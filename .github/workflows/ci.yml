@@ -25,8 +25,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: no em dashes or en dashes
+        # Test files are exempt: they must contain the literal runes to prove the gate
+        # detects them. Everything else, prose and code alike, must be clean.
         run: |
-          if grep -rIn --exclude-dir=.git -P '\x{2014}|\x{2013}' . ; then
+          if grep -rIn --exclude-dir=.git --exclude='*_test.go' -P '\x{2014}|\x{2013}' . ; then
             echo "found an em dash or en dash. Use a comma, a colon, parentheses, or a full stop."
             exit 1
           fi
