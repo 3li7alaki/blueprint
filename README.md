@@ -127,15 +127,25 @@ The prose is for the compliant case. The hooks are for every other case.
 
 ## Install
 
+The CLI, a single static binary with no runtime dependencies:
+
 ```bash
-git clone https://github.com/3li7alaki/blueprint && blueprint/install.sh
+curl -fsSL https://raw.githubusercontent.com/3li7alaki/blueprint/main/install.sh | sh
+```
+
+The Claude Code plugin, for the slash commands and skills:
+
+```
+/plugin marketplace add 3li7alaki/blueprint
+/plugin install blueprint@blueprint
 ```
 
 Then, in any repo:
 
 ```bash
-/blueprint init          # AGENTS.md, CLAUDE.md, hooks, blueprint/
-/blueprint grill         # the interrogation
+blueprint init --hooks   # AGENTS.md, CLAUDE.md, blueprint/, and the enforcement hooks
+/blueprint-grill         # greenfield: the interrogation
+/blueprint-harvest src/  # brownfield: read what exists
 blueprint check          # the gates
 ```
 

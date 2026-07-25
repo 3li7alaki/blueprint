@@ -1,0 +1,17 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "blueprint",
+  "description": "The spec layer above the code. Grill an idea until it has no holes, harvest a codebase that already exists, then gate every commit against the answers.",
+  "owner": {
+    "name": "3li7alaki",
+    "url": "https://github.com/3li7alaki"
+  },
+  "plugins": [
+    {
+      "name": "blueprint",
+      "description": "Grill the idea until it has no holes, then hand your agents a spec they can't misread. Slug traceability, priced unknowns, mechanical gates.",
+      "source": "./",
+      "category": "workflow"
+    }
+  ]
+}
