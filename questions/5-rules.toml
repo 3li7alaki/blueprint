@@ -1,0 +1,83 @@
+pass = "rules"
+produces = "spec: EARS requirements, each with a slug and a confidence marker"
+note = "This is where grilling bites. Every verb needs a trigger and a response. A sentence without both is a wish, not a requirement."
+
+[[q]]
+slug = "trigger-for-verb"
+depth = "quick"
+ask = "You said the system {verb}s. What exactly starts that, and what is the observable result?"
+exit = "a trigger and a response, expressible as WHEN <trigger> THE system SHALL <response>"
+cost = "the model picks a trigger, usually page load, and the behaviour is subtly wrong"
+blocks = ["*"]
+
+[[q]]
+slug = "precondition"
+depth = "standard"
+ask = "Is {rule} always true, or only in some state? Which state?"
+exit = "'always', or a WHILE precondition naming an entity state"
+cost = "a rule fires in a state nobody intended, such as on archived records"
+blocks = []
+
+[[q]]
+slug = "fit-criterion"
+depth = "quick"
+ask = "How would you check {rule} works, without asking anyone's opinion?"
+exit = "an observation with a pass and a fail, e.g. a status code, a stored value, a visible string"
+cost = "untestable requirement, so it is never verified and quietly regresses"
+blocks = ["*"]
+
+[[q]]
+slug = "permission-matrix"
+depth = "standard"
+ask = "For {rule}, which roles may do it, and is the default allow or deny?"
+exit = "a role list and an explicit default; 'deny unless listed' is the recommended answer"
+cost = "default-allow permissions, which is how data leaks"
+blocks = ["*"]
+
+[[q]]
+slug = "notification"
+depth = "standard"
+ask = "When {rule} fires, who gets told, through what channel, and can they turn it off?"
+exit = "recipients, channel, and an opt-out answer, or an explicit 'nobody is told'"
+cost = "either silence where users expect a signal, or a spam complaint"
+blocks = []
+
+[[q]]
+slug = "rate-limit"
+depth = "standard"
+ask = "Can {rule} be triggered a thousand times a minute? Should it be?"
+exit = "a limit with a window, or an explicit 'unbounded, and that is fine because ...'"
+cost = "an accidental or deliberate denial of service, and a surprise bill"
+blocks = []
+
+[[q]]
+slug = "money-rounding"
+depth = "standard"
+ask = "This touches money. What currency, how many decimal places, and which rounding rule?"
+exit = "a currency policy, a precision, and one of: half-up | half-even | truncate"
+cost = "a ledger that does not balance, discovered by a customer, fixed by hand"
+blocks = ["*"]
+
+[[q]]
+slug = "time-semantics"
+depth = "standard"
+ask = "Is {rule} timed in the user's timezone or the server's? What happens across a DST change?"
+exit = "a named timezone policy for storage and for display"
+cost = "reports off by hours, reminders at 3am, duplicate or skipped scheduled runs"
+blocks = []
+
+[[q]]
+slug = "idempotency"
+depth = "paranoid"
+ask = "If {rule} runs twice on the same input, is the result the same?"
+exit = "'idempotent', or a named deduplication key, or an accepted double effect"
+cost = "double charges and duplicate records from a retry that nobody can prevent"
+blocks = []
+
+[[q]]
+slug = "derived-confirm"
+depth = "quick"
+ask = "I inferred this requirement rather than being told it. Confirm, correct, or drop it?"
+exit = "one of: confirmed | corrected to <text> | dropped"
+cost = "an invented requirement gets built, tested and shipped as though a human asked for it"
+blocks = ["*"]

@@ -1,0 +1,45 @@
+{
+  "name": "blueprint",
+  "description": "Grill the idea until it has no holes, then hand your agents a spec they can't misread. Spec-anchored development with slug traceability, priced unknowns, and mechanical gates.",
+  "author": {
+    "name": "3li7alaki",
+    "url": "https://github.com/3li7alaki"
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh \"${CLAUDE_PLUGIN_ROOT}/hooks/session-status.sh\"",
+            "timeout": 10,
+            "statusMessage": "Reading the blueprint..."
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh \"${CLAUDE_PLUGIN_ROOT}/hooks/spec-immutable.sh\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh \"${CLAUDE_PLUGIN_ROOT}/hooks/done-gate.sh\"",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}

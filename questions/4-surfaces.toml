@@ -1,0 +1,83 @@
+pass = "surfaces"
+produces = "spec: one entry per page, screen, endpoint or job, with all five states"
+note = "A surface is only specified when its empty, loading, error and denied states are written down. The happy path is the easy 20 percent."
+
+[[q]]
+slug = "surface-list"
+depth = "quick"
+ask = "List every page, screen, endpoint or scheduled job this feature adds or changes."
+exit = "each named as a slug; 'the app' is not a surface"
+cost = "half the feature is discovered during implementation and re-estimated"
+blocks = ["*"]
+
+[[q]]
+slug = "surface-audience"
+depth = "quick"
+ask = "Who can open {surface}? Who must be refused?"
+exit = "an allow list of role slugs and an explicit refusal behaviour"
+cost = "permissions bolted on per surface, inconsistently, after a leak"
+blocks = ["*"]
+
+[[q]]
+slug = "surface-empty"
+depth = "quick"
+ask = "What does {surface} show to someone who has no data yet?"
+exit = "described content, not 'empty state'"
+cost = "every new user's first impression is a blank screen"
+blocks = []
+
+[[q]]
+slug = "surface-error"
+depth = "standard"
+ask = "What does {surface} show when the request fails? What does the user do next?"
+exit = "a message and a recovery action, or an explicit 'nothing, it retries silently'"
+cost = "users see a raw error or a spinner forever, and support absorbs it"
+blocks = []
+
+[[q]]
+slug = "surface-loading"
+depth = "standard"
+ask = "How long can {surface} take before it feels broken, and what fills that time?"
+exit = "a rough budget in milliseconds and a named loading treatment"
+cost = "performance work with no target, which means no performance work"
+blocks = []
+
+[[q]]
+slug = "surface-denied"
+depth = "standard"
+ask = "When someone lacks permission for {surface}, do they see a refusal or a 404?"
+exit = "one of: refuse visibly | pretend it does not exist"
+cost = "existence of private records leaks through error codes"
+blocks = []
+
+[[q]]
+slug = "surface-writes"
+depth = "standard"
+ask = "What does {surface} change when the user acts? Can the action be undone?"
+exit = "the entities written, and undo answered yes with a window or no"
+cost = "irreversible destructive actions with no confirmation and no recovery"
+blocks = ["*"]
+
+[[q]]
+slug = "surface-volume"
+depth = "standard"
+ask = "How many rows can {surface} show? What happens at ten thousand?"
+exit = "pagination, virtualisation, or an explicit hard cap"
+cost = "the page dies for exactly the customers who matter most"
+blocks = []
+
+[[q]]
+slug = "surface-entry"
+depth = "paranoid"
+ask = "How does a user arrive at {surface}? Is it linkable, bookmarkable, shareable?"
+exit = "named entry points and a yes or no on deep linking"
+cost = "state trapped in memory, so nothing can be shared or resumed"
+blocks = []
+
+[[q]]
+slug = "surface-mobile"
+depth = "paranoid"
+ask = "What does {surface} look like on a phone, and is that a first-class requirement?"
+exit = "'desktop only, stated', or the mobile behaviour described"
+cost = "a responsive retrofit that touches every layout"
+blocks = []

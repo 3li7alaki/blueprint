@@ -1,0 +1,67 @@
+pass = "gates"
+produces = "fit criteria on every requirement, plus the gate commands in AGENTS.md"
+note = "The last pass closes the loop. A requirement without a mechanical check is a requirement nobody will ever verify."
+
+[[q]]
+slug = "fit-missing"
+depth = "quick"
+ask = "{requirement} has no fit criterion. What observation proves it works?"
+exit = "a pass/fail observation, not a feeling"
+cost = "shipped unverified, regressed silently, discovered by a user"
+blocks = ["*"]
+
+[[q]]
+slug = "gate-command"
+depth = "quick"
+ask = "What single command runs the tests in this repo?"
+exit = "an exact command that exits non-zero on failure"
+cost = "no automated gate, so 'done' means 'the agent said so'"
+blocks = ["*"]
+
+[[q]]
+slug = "review-lenses"
+depth = "standard"
+ask = "Which review lenses must this project always run: quality, security, adversarial, accessibility, performance?"
+exit = "a named list, applied to every unit"
+cost = "review quality depends on whichever reviewer happened to run"
+blocks = []
+
+[[q]]
+slug = "safety-tier"
+depth = "standard"
+ask = "Which parts of this system, if wrong, hurt someone or lose money?"
+exit = "a path list; those areas require cross-vendor review under mint's safety carve-out"
+cost = "the highest-risk code gets the same shallow check as a copy change"
+blocks = []
+
+[[q]]
+slug = "definition-of-done"
+depth = "standard"
+ask = "Besides tests passing, what must be true before this ships: docs, migration, feature flag, rollback?"
+exit = "a checklist that is the same for every requirement"
+cost = "'done' means something different every week"
+blocks = []
+
+[[q]]
+slug = "observability"
+depth = "standard"
+ask = "If {requirement} breaks in production at 3am, how do you find out?"
+exit = "a named signal: an alert, a log line, a metric, or an explicit 'a user tells us'"
+cost = "silent failures that run for weeks"
+blocks = []
+
+[[q]]
+slug = "rollback"
+depth = "paranoid"
+ask = "This ships and it is wrong. How do you undo it, and how long does that take?"
+exit = "a rollback mechanism and a rough time to recover"
+cost = "a forward-only fix under pressure, which is how outages get longer"
+blocks = []
+
+[[q]]
+slug = "acceptance-owner"
+depth = "paranoid"
+ask = "Who is allowed to say this requirement is satisfied, and are they independent of who built it?"
+exit = "a named checker distinct from the maker"
+cost = "the maker grades their own homework, which mint's floor exists to prevent"
+blocks = []

@@ -1,0 +1,83 @@
+pass = "nouns"
+produces = "spec: entity definitions and lifecycle states"
+note = "Ambiguous nouns are the number one hallucination source. User, account, member and profile are four different things until someone says otherwise."
+
+[[q]]
+slug = "entity-list"
+depth = "quick"
+ask = "List every thing this system stores. Not screens, not actions. Things."
+exit = "each entity named as a singular slug"
+cost = "the model invents a data model and every later answer is anchored to the wrong one"
+blocks = ["*"]
+
+[[q]]
+slug = "entity-definition"
+depth = "quick"
+ask = "Define {entity} in one sentence. What is it NOT, that someone might confuse it with?"
+exit = "a definition plus at least one explicit non-example"
+cost = "two people build against two different meanings of the same word"
+blocks = ["*"]
+
+[[q]]
+slug = "entity-states"
+depth = "standard"
+ask = "What states can a {entity} be in?"
+exit = "every state has an inbound and an outbound transition, or is explicitly terminal"
+cost = "records get stuck in states with no exit, discovered by a support ticket"
+blocks = ["*"]
+
+[[q]]
+slug = "entity-owner"
+depth = "standard"
+ask = "Who owns a {entity}? Can ownership move?"
+exit = "an owning entity named, and transfer answered yes with rules or no"
+cost = "permissions and billing both hang off ownership; changing it later touches every query"
+blocks = ["*"]
+
+[[q]]
+slug = "delete-cascade"
+depth = "standard"
+ask = "When a {entity} is deleted, what happens to everything attached to it?"
+exit = "named one of: cascade | orphan | block | soft-delete, per child type"
+cost = "data model and every query; discovered late it is a migration under load"
+blocks = ["*"]
+
+[[q]]
+slug = "soft-vs-hard-delete"
+depth = "standard"
+ask = "Does deleting a {entity} really remove it, or hide it? Can the user get it back?"
+exit = "one of: hard | soft with a retention window | soft forever"
+cost = "every list query, every unique constraint, and every compliance answer depends on this"
+blocks = ["*"]
+
+[[q]]
+slug = "identity-key"
+depth = "standard"
+ask = "What makes two {entity} records the same record? What must be unique?"
+exit = "a natural key or an explicit 'nothing, ids only', plus the uniqueness constraints"
+cost = "duplicates that cannot be merged without a manual data cleanup"
+blocks = ["*"]
+
+[[q]]
+slug = "tenancy"
+depth = "standard"
+ask = "Can two customers ever see each other's {entity}? Is this multi-tenant?"
+exit = "'single tenant' or a named tenant boundary that every query must filter on"
+cost = "a cross-tenant data leak, which is a company-ending bug, not a defect"
+blocks = ["*"]
+
+[[q]]
+slug = "history"
+depth = "paranoid"
+ask = "Do you need to know what a {entity} looked like last month, and who changed it?"
+exit = "'no history', 'audit log', or 'full versioning' with the retention period"
+cost = "audit trails cannot be reconstructed backwards; the data is simply gone"
+blocks = []
+
+[[q]]
+slug = "external-source"
+depth = "paranoid"
+ask = "Does {entity} mirror something in another system? Which side wins on conflict?"
+exit = "'local only', or a named system of record and a conflict rule"
+cost = "two systems silently diverge and neither is trusted afterwards"
+blocks = []

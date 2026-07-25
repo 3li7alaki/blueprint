@@ -1,0 +1,83 @@
+pass = "edges"
+produces = "spec: the Edges table, plus new requirements for every edge that changes behaviour"
+note = "Run this per requirement, not per feature. An edge that changes behaviour is a new requirement with its own slug, not a footnote."
+
+[[q]]
+slug = "concurrent"
+depth = "quick"
+ask = "Two people do {rule} at the same moment on the same record. What happens?"
+exit = "one of: last write wins | first wins | conflict surfaced | locked"
+cost = "silent data loss that nobody can reproduce and no test catches"
+blocks = []
+
+[[q]]
+slug = "empty-input"
+depth = "quick"
+ask = "What does {rule} do with nothing: no rows, empty string, zero, null?"
+exit = "behaviour named for each empty case that can occur"
+cost = "crashes and blank screens on the most common first-run path"
+blocks = []
+
+[[q]]
+slug = "huge-input"
+depth = "standard"
+ask = "What is the largest input {rule} must accept, and what happens one byte over?"
+exit = "a limit with a unit and a refusal behaviour"
+cost = "a timeout or an out-of-memory kill in production, triggered by a real user"
+blocks = []
+
+[[q]]
+slug = "parent-deleted"
+depth = "standard"
+ask = "What if the record {rule} depends on is deleted mid-flight?"
+exit = "one of: abort | proceed with a snapshot | block the delete"
+cost = "dangling references and errors that only appear under real usage"
+blocks = []
+
+[[q]]
+slug = "third-party-down"
+depth = "standard"
+ask = "The external service {rule} needs is down or slow. What does the user see?"
+exit = "a timeout budget, a retry policy, and the user-visible behaviour"
+cost = "your uptime silently becomes the worst of all your vendors"
+blocks = []
+
+[[q]]
+slug = "partial-failure"
+depth = "standard"
+ask = "{rule} does several things. If step three fails, what happened to steps one and two?"
+exit = "'all or nothing', or the exact partial state that is acceptable and recoverable"
+cost = "half-applied operations that need manual repair, one customer at a time"
+blocks = ["*"]
+
+[[q]]
+slug = "hostile-actor"
+depth = "standard"
+ask = "A user tampers with the input to {rule} to reach another user's data. What stops them?"
+exit = "a named server-side check; 'the UI hides it' is not an answer"
+cost = "a real breach, disclosure obligations, and the end of customer trust"
+blocks = ["*"]
+
+[[q]]
+slug = "replay"
+depth = "paranoid"
+ask = "Can an old, captured request for {rule} be replayed later? Should it work?"
+exit = "an expiry, a nonce, or an explicit accepted risk"
+cost = "replayed payments, replayed invites, replayed password resets"
+blocks = []
+
+[[q]]
+slug = "clock-skew"
+depth = "paranoid"
+ask = "{rule} depends on time. Whose clock, and how wrong can it be before it breaks?"
+exit = "a single authoritative clock and a tolerated skew"
+cost = "tokens valid too long or rejected too early, intermittently, across machines"
+blocks = []
+
+[[q]]
+slug = "migration-path"
+depth = "paranoid"
+ask = "Records created before {rule} existed do not satisfy it. What happens to them?"
+exit = "backfill, grandfather, or reject on next touch"
+cost = "old rows silently violate an invariant every new query assumes"
+blocks = []

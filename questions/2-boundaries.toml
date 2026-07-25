@@ -1,0 +1,67 @@
+pass = "boundaries"
+produces = "PROJECT.md: non-goals, v1 cut line"
+note = "Founders never volunteer non-goals. Every one extracted here is a feature you will not have to argue about later."
+
+[[q]]
+slug = "v1-cut"
+depth = "quick"
+ask = "If you could only ship three features, which three, and what does the demo look like?"
+exit = "exactly three named features and a walkthrough with a beginning and an end"
+cost = "everything ships at once, so nothing ships"
+blocks = ["*"]
+
+[[q]]
+slug = "explicit-non-goals"
+depth = "quick"
+ask = "Name five things people will ask for that you are deliberately not building."
+exit = "five items, each with a one-line reason"
+cost = "scope creep with no written defence against it"
+blocks = ["*"]
+
+[[q]]
+slug = "not-yet-vs-never"
+depth = "standard"
+ask = "For each non-goal: never, or not yet? If not yet, roughly when?"
+exit = "each non-goal tagged never or not-yet"
+cost = "never-features get designed around anyway, adding permanent complexity"
+blocks = []
+
+[[q]]
+slug = "throwaway-or-forever"
+depth = "standard"
+ask = "Is this a prototype you will throw away, or the codebase you live in for two years?"
+exit = "one of: throwaway | pivot-likely | long-lived"
+cost = "over-engineering a demo, or under-engineering a foundation"
+blocks = []
+
+[[q]]
+slug = "platforms"
+depth = "standard"
+ask = "Web, mobile web, native app, CLI, API: which of these exist in v1?"
+exit = "an explicit in/out list, including mobile web as a distinct answer from native"
+cost = "responsive retrofit, or a native app nobody scoped"
+blocks = ["*"]
+
+[[q]]
+slug = "one-language"
+depth = "standard"
+ask = "One language forever, or will this be translated? Right-to-left ever?"
+exit = "'English only, permanently' or a named set of locales including RTL yes/no"
+cost = "i18n retrofit touches every string, every layout, and every date format"
+blocks = []
+
+[[q]]
+slug = "offline"
+depth = "paranoid"
+ask = "What should happen if the user loses connectivity mid-action?"
+exit = "one of: fail loudly | queue and retry | full offline mode"
+cost = "offline support is an architecture, not a feature; it cannot be added late"
+blocks = []
+
+[[q]]
+slug = "third-party-lock"
+depth = "paranoid"
+ask = "Which third parties are you willing to depend on, and which are you not?"
+exit = "an allowed list and a banned list, or an explicit 'no preference'"
+cost = "a dependency gets vetoed after integration"
+blocks = []

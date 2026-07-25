@@ -1,0 +1,83 @@
+pass = "frame"
+produces = "PROJECT.md: problem, users, success, constraints"
+note = "A weak answer here kills the project. That is the cheapest possible outcome."
+
+[[q]]
+slug = "who-hurts"
+depth = "quick"
+ask = "Who has this problem today, and what do they do right now instead?"
+exit = "a named role and a named current workaround; 'nothing' is not a workaround"
+cost = "building for nobody"
+blocks = ["*"]
+
+[[q]]
+slug = "cost-of-nothing"
+depth = "quick"
+ask = "If this is never built, what specifically goes wrong for them?"
+exit = "a consequence with a magnitude: time, money, risk, or churn"
+cost = "no way to prioritise anything later; every feature looks equally important"
+blocks = ["*"]
+
+[[q]]
+slug = "success-metric"
+depth = "quick"
+ask = "What number, by what date, means this worked?"
+exit = "one metric, one number, one date"
+cost = "no definition of done at the project level; scope grows forever"
+blocks = ["*"]
+
+[[q]]
+slug = "roles"
+depth = "quick"
+ask = "List every kind of person who touches this system, including you and support staff."
+exit = "each role named as a slug, with what they want and what they must never see"
+cost = "permissions retrofit across every surface"
+blocks = ["*"]
+
+[[q]]
+slug = "admin-operator"
+depth = "standard"
+ask = "Who operates this in production, and what do they need to do, such as refund, ban, impersonate, or fix bad data?"
+exit = "either a named list of operator actions, or an explicit 'none, we use the database'"
+cost = "the most-forgotten surface in every project; retrofitted as a rushed unsafe admin panel"
+blocks = ["*"]
+
+[[q]]
+slug = "existing-data"
+depth = "standard"
+ask = "Is there existing data or an existing system this must inherit, mirror, or migrate from?"
+exit = "'greenfield' or a named source with a rough shape and volume"
+cost = "the data model is wrong from line one; migration becomes a rewrite"
+blocks = ["*"]
+
+[[q]]
+slug = "scale-now-and-later"
+depth = "standard"
+ask = "How many users and how many rows at launch, and at one year?"
+exit = "two order-of-magnitude numbers, e.g. 100 / 50k"
+cost = "architecture chosen for the wrong scale in either direction"
+blocks = ["*"]
+
+[[q]]
+slug = "hard-constraints"
+depth = "standard"
+ask = "What is already decided and not up for debate: stack, host, deadline, budget, team size?"
+exit = "an explicit list, or an explicit 'nothing is fixed'"
+cost = "a design that gets vetoed after it is built"
+blocks = ["*"]
+
+[[q]]
+slug = "regulated"
+depth = "standard"
+ask = "Does this touch money, health, children, biometrics, or EU/UK personal data?"
+exit = "yes with the regime named, or an explicit no"
+cost = "compliance retrofit; in some regimes, the product cannot legally ship"
+blocks = ["*"]
+
+[[q]]
+slug = "competitor-delta"
+depth = "paranoid"
+ask = "Something like this exists. Why does yours win, in one sentence a user would repeat?"
+exit = "a difference a user could notice, not an internal one"
+cost = "a correct build of a product nobody switches to"
+blocks = []
