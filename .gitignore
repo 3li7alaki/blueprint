@@ -1,3 +1,4 @@
 dist/
-/blueprint
+/blueprint.exe
+/cli/blueprint
 *.tmp
