@@ -10,6 +10,7 @@ import (
 // A gate that cannot see new files reports green on code it never read. Plain `git ls-files`
 // lists only tracked files, so every scan-based gate passed on an empty list until Files
 // started asking for untracked ones too.
+// @spec traceability/gates-see-untracked
 func TestFilesIncludesUntracked(t *testing.T) {
 	root := t.TempDir()
 	if out, err := exec.Command("git", "-C", root, "init", "-q").CombinedOutput(); err != nil {

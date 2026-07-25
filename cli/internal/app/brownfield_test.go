@@ -10,6 +10,7 @@ import (
 	"time"
 )
 
+// @spec confidence/bug-marker-holds-the-gate
 func TestBrownfieldWriters(t *testing.T) {
 	root := t.TempDir()
 	run := testRunner(t, root)

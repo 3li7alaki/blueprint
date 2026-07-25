@@ -9,6 +9,8 @@ import (
 	"time"
 )
 
+// @spec traceability/slugs-are-words
+// @spec unknowns/resolve-needs-an-answer
 func TestWriteAndReadCommands(t *testing.T) {
 	root := t.TempDir()
 	fixed := time.Date(2026, 7, 25, 0, 0, 0, 0, time.UTC)

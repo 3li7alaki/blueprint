@@ -10,6 +10,7 @@ import (
 // The spec template explains the format in prose, so the literal token `derived` appears in a
 // guidance comment above the requirements. A whole-file replace edits that comment, reports
 // success, and leaves the requirement derived: the anti-hallucination clause silently off.
+// @spec confidence/confirm-targets-one-requirement
 func TestConfirmEditsTheRequirementNotTheGuidance(t *testing.T) {
 	root := t.TempDir()
 	fixed := time.Date(2026, 7, 25, 0, 0, 0, 0, time.UTC)

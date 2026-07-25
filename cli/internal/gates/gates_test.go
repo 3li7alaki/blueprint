@@ -6,6 +6,8 @@ import (
 	"testing"
 )
 
+// @spec traceability/coverage-is-literal
+// @spec confidence/derived-is-unimplementable
 func TestGateFailures(t *testing.T) {
 	tests := []struct {
 		name string
@@ -31,6 +33,7 @@ func TestGateFailures(t *testing.T) {
 	}
 }
 
+// @spec unknowns/open-entries-block
 func TestUnmappedGate(t *testing.T) {
 	tests := []struct {
 		name   string
