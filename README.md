@@ -16,6 +16,12 @@ spec into the repo so agents can't quietly drift from it.
          unknowns, priced         traceability
 ```
 
+```bash
+curl -fsSL https://raw.githubusercontent.com/3li7alaki/blueprint/main/install.sh | sh
+```
+
+One static binary, no runtime dependencies. [Plugin and first steps below.](#install)
+
 ## The problem, precisely
 
 Three failures, all the same root:
