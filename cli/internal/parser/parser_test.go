@@ -52,3 +52,33 @@ func TestOpenIgnoresTemplateCommentAndParsesEntries(t *testing.T) {
 		t.Fatalf("entries = %#v", entries)
 	}
 }
+
+func TestRequirementOptionalLinesRoundTrip(t *testing.T) {
+	tests := []struct {
+		name     string
+		optional string
+		evidence string
+		bug      string
+	}{
+		{name: "absent"},
+		{name: "evidence", optional: "evidence: src/pay.go:12\n", evidence: "src/pay.go:12"},
+		{name: "evidence and bug", optional: "evidence: src/pay.go:12\nbug: charges twice\n", evidence: "src/pay.go:12", bug: "charges twice"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			path := filepath.Join(t.TempDir(), "feature.md")
+			data := "# feature\nstatus: ready\ndepth: quick\n\n## Intent\n\n## Surfaces\n\n## Requirements\n### works\n`derived`\nWHEN called, THE system SHALL answer.\nfit: returns success\n" + tt.optional + "\n## Edges\n| edge | answer |\n\n## Out of scope\n\n## Depends on\n"
+			if err := os.WriteFile(path, []byte(data), 0o644); err != nil {
+				t.Fatal(err)
+			}
+			spec, err := Spec(path)
+			if err != nil {
+				t.Fatal(err)
+			}
+			got := spec.Requirements[0]
+			if got.Evidence != tt.evidence || got.Bug != tt.bug {
+				t.Fatalf("requirement = %#v", got)
+			}
+		})
+	}
+}

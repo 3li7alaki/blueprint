@@ -11,7 +11,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "sh \"${CLAUDE_PLUGIN_ROOT}/hooks/session-status.sh\"",
+            "command": "blueprint hook session",
             "timeout": 10,
             "statusMessage": "Reading the blueprint..."
           }
@@ -24,7 +24,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "sh \"${CLAUDE_PLUGIN_ROOT}/hooks/spec-immutable.sh\"",
+            "command": "blueprint hook pre-write",
             "timeout": 5
           }
         ]
@@ -35,7 +35,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "sh \"${CLAUDE_PLUGIN_ROOT}/hooks/done-gate.sh\"",
+            "command": "blueprint hook done",
             "timeout": 30
           }
         ]

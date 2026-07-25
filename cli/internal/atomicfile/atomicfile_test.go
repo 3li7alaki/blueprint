@@ -14,8 +14,8 @@ func TestWrite(t *testing.T) {
 		wantErr bool
 	}{
 		{name: "plain", content: "plain\n"},
-		{name: "em dash", content: "bad—value", wantErr: true},
-		{name: "en dash", content: "bad–value", wantErr: true},
+		{name: "em dash", content: "bad\u2014value", wantErr: true},
+		{name: "en dash", content: "bad\u2013value", wantErr: true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

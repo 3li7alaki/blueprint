@@ -107,9 +107,23 @@ func Spec(path string) (model.Spec, error) {
 		r := model.Requirement{Feature: feature, Slug: slug, Confidence: trimTicks(strings.TrimSpace(reqLines[conf])), EARS: reqLines[ears], Fit: strings.TrimPrefix(reqLines[fit], "fit: "), Line: sectionLine(lines, "Requirements") + start + 1}
 		i = fit
 		next := nextContent(reqLines, i+1)
+		if next >= 0 && strings.HasPrefix(reqLines[next], "evidence: ") {
+			r.Evidence = strings.TrimPrefix(reqLines[next], "evidence: ")
+			i = next
+			next = nextContent(reqLines, i+1)
+		}
+		if next >= 0 && strings.HasPrefix(reqLines[next], "bug: ") {
+			r.Bug = strings.TrimPrefix(reqLines[next], "bug: ")
+			i = next
+			next = nextContent(reqLines, i+1)
+		}
 		if next >= 0 && strings.HasPrefix(reqLines[next], "superseded-by: ") {
 			r.SupersededBy = strings.TrimSpace(strings.TrimPrefix(reqLines[next], "superseded-by: "))
 			i = next
+			next = nextContent(reqLines, i+1)
+		}
+		if next >= 0 && !strings.HasPrefix(reqLines[next], "### ") {
+			return bad(sectionLine(lines, "Requirements")+next+1, "unexpected requirement line")
 		}
 		s.Requirements = append(s.Requirements, r)
 	}

@@ -71,6 +71,42 @@ Your traceability matrix is `rg '@spec' | sort`. No database, no tool, no ceremo
 EARS acceptance, scope and gates map one-to-one. blueprint says what's worth building. mint
 says whether it's allowed to be called done.
 
+## Your codebase already exists
+
+Most projects are not blank pages, and a spec tool that assumes otherwise gets abandoned in week
+two. So blueprint harvests.
+
+Code is evidence of what a system does. It is never evidence of what it should do. Everything
+harvested is therefore `derived`: written into the spec, carrying `file:line` evidence, and
+unimplementable until a human confirms it. The spec never lies about what it knows.
+
+```sh
+blueprint harvest scope 'src/checkout/**'    # one area, never the whole repo
+blueprint map                                 # 11% mapped, 9 open
+/blueprint-harvest src/checkout               # the agent reads, you answer
+```
+
+Then the confirm pass, ordered by blast radius rather than by file, because people skim when
+question twelve feels as trivial as question eleven. Three answers, not two:
+
+| answer | means |
+|---|---|
+| **confirm** | the code is right, this becomes `stated` |
+| **correct** | it should behave differently, and the code now fails a stated requirement |
+| **bug** | nobody meant this; the gate goes red until it is fixed |
+
+The last two are why this pays for itself on day one. The moment someone says "no, sessions
+should expire in 7 days", you have a tracked slug, a red gate and a place to start, instead of a
+vague sense that something is off in auth.
+
+What harvesting actually finds is rarely the requirements. It is the loose ends: a state nothing
+transitions into, error handling on four of five sibling routes, a permission enforced in the UI
+and nowhere on the server, a test asserting behaviour the code no longer has. Those are worth
+more than a hundred requirements describing code that was already fine.
+
+You never spec the whole codebase. You harvest the area you are about to touch, and `map` gives
+you a number that goes up.
+
 ## Why agents actually obey it
 
 Because it isn't written as a request. Models follow roughly 150 to 200 instructions before

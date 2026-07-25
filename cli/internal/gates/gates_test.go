@@ -16,7 +16,7 @@ func TestGateFailures(t *testing.T) {
 		{name: "coverage", file: "blueprint/spec/feature.md", data: validSpec(), gate: "coverage"},
 		{name: "orphan", file: "app.go", data: "// @spec missing/thing\n", gate: "orphan"},
 		{name: "derived", file: "app.go", data: "// @spec feature/derived-rule\n", gate: "derived"},
-		{name: "dash", file: "notes.txt", data: "bad—dash\n", gate: "dash"},
+		{name: "dash", file: "notes.txt", data: "bad\u2014dash\n", gate: "dash"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -25,6 +25,29 @@ func TestGateFailures(t *testing.T) {
 			write(t, root, tt.file, tt.data)
 			results := Run(root, tt.gate)
 			if len(results) != 1 || results[0].Status != "fail" {
+				t.Fatalf("results = %#v", results)
+			}
+		})
+	}
+}
+
+func TestUnmappedGate(t *testing.T) {
+	tests := []struct {
+		name   string
+		source string
+		want   string
+	}{
+		{name: "passes mapped", source: "// @spec feature/uncovered\n", want: "pass"},
+		{name: "fails unmapped", source: "package app\n", want: "fail"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			root := t.TempDir()
+			write(t, root, "blueprint/spec/feature.md", validSpec())
+			write(t, root, "blueprint/PROJECT.md", "# Project\n\n## Harvested\n- src/**\n")
+			write(t, root, "src/app.go", tt.source)
+			results := Run(root, "unmapped")
+			if len(results) != 1 || results[0].Status != tt.want {
 				t.Fatalf("results = %#v", results)
 			}
 		})

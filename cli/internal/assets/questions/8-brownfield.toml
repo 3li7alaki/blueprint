@@ -1,0 +1,99 @@
+pass = "brownfield"
+produces = "derived requirements with evidence, plus OPEN entries for everything the code cannot answer"
+note = "Run this instead of frame and nouns when the code already exists. Code is evidence of what a system does and never of what it should do, so everything this pass produces is derived until a human confirms it."
+
+[[q]]
+slug = "what-is-this-for"
+depth = "quick"
+ask = "I can read what {scope} does. I cannot read who it is for or what breaks without it. Tell me that."
+exit = "a named role and a consequence; 'it just works' is not a consequence"
+cost = "a spec that documents the implementation instead of the intent, which is worth nothing"
+blocks = ["*"]
+
+[[q]]
+slug = "correct-or-accident"
+depth = "quick"
+ask = "The code does {behaviour}. Was that decided, or did it end up that way?"
+exit = "one of: intended | accident that is fine | accident that is a bug"
+cost = "an accident gets frozen into a spec and defended forever as a requirement"
+blocks = []
+
+[[q]]
+slug = "unreachable-state"
+depth = "standard"
+ask = "{entity} can be in state {state}, but nothing in the code moves it there. Dead, or is something missing?"
+exit = "one of: dead, remove it | reachable elsewhere, name where | missing, that is a bug"
+cost = "either dead states nobody dares delete, or a transition that was quietly lost"
+blocks = []
+
+[[q]]
+slug = "inconsistent-siblings"
+depth = "standard"
+ask = "{a} handles this case and {b} does not, though they look like siblings. Which one is right?"
+exit = "the correct behaviour named, and whether the other is a bug"
+cost = "the same question answered two ways, so neither can be trusted"
+blocks = []
+
+[[q]]
+slug = "ui-only-guard"
+depth = "standard"
+ask = "{action} is hidden in the interface but I see no server-side check. Is there one?"
+exit = "a named server-side check, or an admission that there is none"
+cost = "a real breach; a hidden button is not a permission"
+blocks = ["*"]
+
+[[q]]
+slug = "test-contradicts-code"
+depth = "standard"
+ask = "A test asserts {assertion}, but the code no longer does that. Which is stale?"
+exit = "one of: test is stale | code regressed"
+cost = "a green suite that proves nothing, which is worse than no suite"
+blocks = []
+
+[[q]]
+slug = "no-test-at-all"
+depth = "standard"
+ask = "{behaviour} has no test. Is it important enough to need one, or genuinely trivial?"
+exit = "one of: needs a fit criterion | trivial, stated as such"
+cost = "the untested path is usually the one that breaks and nobody notices"
+blocks = []
+
+[[q]]
+slug = "why-this-way"
+depth = "standard"
+ask = "{choice} looks deliberate and unusual. Is there a reason, or is it left over?"
+exit = "a reason worth a decision record, or 'leftover', which makes it changeable"
+cost = "nobody dares touch it, so it constrains every future change by superstition"
+blocks = []
+
+[[q]]
+slug = "orphan-code"
+depth = "standard"
+ask = "Nothing calls {symbol}. Dead, or reached some way I cannot see, such as reflection, a cron, or a webhook?"
+exit = "one of: dead, deletable | reached via <named entry point>"
+cost = "either carrying dead weight forever, or deleting something a production job depends on"
+blocks = []
+
+[[q]]
+slug = "config-behaviour"
+depth = "paranoid"
+ask = "{flag} changes behaviour at runtime. What is it set to in production, and is the other branch still supported?"
+exit = "the production value, and whether the other path must keep working"
+cost = "half the code is unreachable in reality, or a flag flip resurrects untested paths"
+blocks = []
+
+[[q]]
+slug = "undocumented-dependency"
+depth = "paranoid"
+ask = "{scope} calls {service}. What happens to your users when it is down, and has that ever happened?"
+exit = "the user-visible behaviour, plus whether it is deliberate"
+cost = "your availability is silently the product of every vendor's availability"
+blocks = []
+
+[[q]]
+slug = "data-nobody-owns"
+depth = "paranoid"
+ask = "{table} has rows that predate the current code. Do they still satisfy what the code now assumes?"
+exit = "one of: verified | backfilled | unknown, which is an OPEN entry"
+cost = "old rows silently violate an invariant every new query takes for granted"
+blocks = []

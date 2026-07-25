@@ -52,3 +52,25 @@ func IsTest(path string) bool {
 	path = filepath.ToSlash(path)
 	return !strings.HasPrefix(path, "blueprint/spec/") && testRE.MatchString(path)
 }
+
+func MatchGlob(pattern, name string) bool {
+	var b strings.Builder
+	b.WriteByte('^')
+	for i := 0; i < len(pattern); i++ {
+		switch pattern[i] {
+		case '*':
+			if i+1 < len(pattern) && pattern[i+1] == '*' {
+				b.WriteString(".*")
+				i++
+			} else {
+				b.WriteString("[^/]*")
+			}
+		case '?':
+			b.WriteString("[^/]")
+		default:
+			b.WriteString(regexp.QuoteMeta(string(pattern[i])))
+		}
+	}
+	b.WriteByte('$')
+	return regexp.MustCompile(b.String()).MatchString(filepath.ToSlash(name))
+}

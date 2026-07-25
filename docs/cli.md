@@ -23,8 +23,50 @@ Every command supports `--json`. Human output is never the integration protocol.
 | `blueprint ask <pass> [--depth quick\|standard\|paranoid] [--batch 5]` | next unanswered questions from the bank |
 | `blueprint check [--gate <name>]` | gate results, exit 1 on any failure |
 | `blueprint mint <feature>/<slug>` | the `mint spec new` command line for that requirement, on stdout, unexecuted |
+| `blueprint map [--path <p>]` | coverage per directory: files, mapped, unmapped, derived, open |
+| `blueprint inventory <path>` | every file under path: test or code, tagged or not, line count |
 
 `req next` is the command an idle agent loop calls. It is the whole scheduler.
+
+`ask` substitutes `{braces}` in a question with `--for <value>`. The bank asks about `{entity}`
+once per entity, and the caller owns that loop. Teaching the binary to enumerate entities would
+mean parsing prose, so it does not try.
+
+`ask` skips questions already recorded in `blueprint/.grill`, so a grill resumes across sessions
+instead of restarting at question one. `--all` ignores the ledger.
+
+## Brownfield
+
+An existing codebase is not a blank page, and pretending otherwise is why spec tools get
+abandoned in week two. Code is evidence of what a system does. It is never evidence of what it
+should do, so everything harvested from it is `derived` and stays unimplementable until a human
+confirms it.
+
+The binary does not read code semantically. It ships the ledger; an agent running the `harvest`
+skill reads the source and calls the writers. Teaching a Go binary to parse every framework is a
+bottomless pit and the model is better at it anyway.
+
+| command | does |
+|---|---|
+| `blueprint harvest scope <glob>` | adds a glob to the harvested set in `PROJECT.md`. The progress ledger. |
+| `blueprint req correct <feature>/<slug> --ears <s> --reason <s>` | the human says the code is wrong: rewrite to intended behaviour, mark `stated` |
+| `blueprint req bug <feature>/<slug> --reason <s>` | the human says the current behaviour is a defect: mark `stated`, record `bug:` |
+| `blueprint req fixed <feature>/<slug>` | clears the `bug:` marker once the code matches |
+| `blueprint ask --confirm [--path <p>] [--batch 5]` | derived requirements needing a human, ordered by blast radius, each with its evidence |
+
+`ask --confirm` orders by consequence, never by file order: money, then auth and permissions,
+then data loss, then everything else. People skim when question twelve feels as trivial as
+question eleven. The classifier is a keyword match over the slug, EARS text and evidence paths,
+which is crude on purpose; it decides ordering only, never whether something is asked.
+
+Three answers, not two. `confirm` when the code is right, `correct` when it should behave
+differently, `bug` when nobody meant this. The last two are why harvesting an existing codebase
+pays for itself on day one: each produces a `stated` requirement the current code fails, which
+is a red gate and a slug to fix against, rather than a vague sense that something is off.
+
+`harvest scope` is required before the `unmapped` gate reports anything. Scope one area at a
+time, the one you are about to touch. A repo-wide harvest produces hundreds of unconfirmed
+requirements nobody reads, which is worse than no spec because it looks like one.
 
 ## Write
 
@@ -34,7 +76,7 @@ reformat untouched lines, and refuse to produce an em dash or en dash.
 | command | does |
 |---|---|
 | `blueprint spec new <feature>` | writes `blueprint/spec/<feature>.md` from the template |
-| `blueprint req add <feature>/<slug> --ears <s> --fit <s> --confidence stated\|derived` | appends a requirement |
+| `blueprint req add <feature>/<slug> --ears <s> --fit <s> --confidence stated\|derived [--evidence <s>]` | appends a requirement |
 | `blueprint req confirm <feature>/<slug>` | flips `derived` to `stated`. The only way. |
 | `blueprint open add <slug> --question <s> --cost <s> --blocks <globs> [--status OPEN\|DEFERRED] [--pass <p>] [--owner <s>]` | appends an unknown |
 | `blueprint open resolve <slug>` | removes the entry. Refuses unless the answer already exists in a spec or decision file. |
@@ -42,8 +84,24 @@ reformat untouched lines, and refuse to produce an em dash or en dash.
 | `blueprint supersede <old-slug> <new-slug>` | marks a decision or requirement superseded |
 | `blueprint amend <feature>/<slug> --ears <s> --reason <s>` | the only legal edit to an existing requirement. Records the old text and the reason. |
 
-`blueprint init` writes `AGENTS.md` (appending the block if the file exists), `CLAUDE.md`,
-`blueprint/` from templates, and the hook entries. It never overwrites an existing spec.
+`blueprint init` writes `AGENTS.md` (appending the block if the file exists), `CLAUDE.md`, and
+`blueprint/` from templates. It never overwrites an existing spec.
+
+`blueprint init --hooks` additionally merges three entries into `.claude/settings.json`, creating
+it if absent and leaving unrelated keys untouched:
+
+| event | command | effect |
+|---|---|---|
+| `SessionStart` | `blueprint hook session` | injects open blockers, failing gates, next requirement |
+| `PreToolUse` on `Edit\|Write\|MultiEdit` | `blueprint hook pre-write` | refuses hand edits to `blueprint/spec/` and `blueprint/decisions/` |
+| `Stop` | `blueprint hook done` | refuses to end a turn while a gate is red |
+
+The hooks are subcommands, not scripts written into the repo. A copied script goes stale the
+day the binary changes, and every repo would carry its own drifting copy. Each reads the hook
+payload on stdin and exits 0 to allow or 2 to block, with the reason on stderr.
+
+`blueprint hook pre-write` allows the edit when `BLUEPRINT_AMEND=1`, which the writers set for
+their own atomic replacements.
 
 ## Gates
 
@@ -58,6 +116,8 @@ reformat untouched lines, and refuse to produce an em dash or en dash.
 | `derived` | a `derived` requirement has implementing code |
 | `shape` | a requirement is missing its confidence, EARS or fit line |
 | `dash` | any tracked file contains an em dash or en dash |
+| `unmapped` | a non-test file inside a harvested scope carries no `@spec` tag |
+| `bug` | a requirement carries a `bug:` marker, meaning the code is known to violate it |
 | `drift` | a spec file is newer than the newest file carrying one of its `@spec` tags |
 
 Exit code is 0 or 1. `--json` emits `{gate, status, offenders[]}` per gate.
@@ -104,6 +164,8 @@ depth: quick | standard | paranoid
 `stated` | `derived`
 <EARS line, ending in a full stop>
 fit: <one line>
+evidence: <optional, one line>
+bug: <optional, one line>
 
 ## Edges
 | edge | answer |
@@ -111,6 +173,14 @@ fit: <one line>
 ## Out of scope
 ## Depends on
 ```
+
+`evidence:` is optional and free text. `harvest` writes `file:line` references so a human can
+check a derived claim instead of taking it on faith; a grill may instead cite the question that
+produced it. Confirmation without a pointer is a vote, not a review.
+
+`bug:` is optional and written only by `req bug`. Its presence means the requirement states the
+intended behaviour and the code is known to violate it, so the `bug` gate stays red until
+`req fixed` clears it. Both lines, when present, follow `fit:` in that order.
 
 `###` headings mean a surface under `## Surfaces` and a requirement under `## Requirements`.
 Backticks around a heading slug are stripped. Feature slug must equal the filename stem.
@@ -147,6 +217,25 @@ date: 2026-07-25
 ```
 
 Immutable once written. A change is a new file plus `blueprint supersede`.
+
+### `blueprint/PROJECT.md`
+
+Free text except one machine-read section, absent in a greenfield project:
+
+```md
+## Harvested
+- src/auth/**
+- src/checkout/**
+```
+
+Written by `blueprint harvest scope`. The `unmapped` gate only looks inside these globs, so an
+un-harvested legacy tree never fails a gate and the list itself is the progress ledger.
+
+### `blueprint/.grill`
+
+An append-only ledger, one question slug per line, written when a bank question has been asked
+and dealt with. Not a document, never read by a human, and the reason a grill resumes where it
+stopped instead of restarting at question one.
 
 ## Implementation notes
 

@@ -23,6 +23,7 @@ import (
 )
 
 type App struct {
+	In      io.Reader
 	Out     io.Writer
 	Err     io.Writer
 	Now     func() time.Time
@@ -48,15 +49,24 @@ read
   req next                           the next startable requirement
   open list [--blocking <f|f/slug>] [--status OPEN|DEFERRED]
   trace <feature>/<slug>             files carrying the tag, code and test
-  ask <pass> [--depth quick|standard|paranoid] [--batch n]
-  check [--gate coverage|orphan|budget|blocked|derived|shape|dash|drift]
+  map [--path p]                     coverage per directory
+  inventory <path>                   files, kind, tags, and line counts
+  ask <pass> [--depth quick|standard|paranoid] [--batch n] [--for value] [--all]
+  ask --confirm [--path p] [--batch n]
+  check [--gate coverage|orphan|budget|blocked|derived|shape|dash|unmapped|bug|drift]
   mint <feature>/<slug>              prints the mint unit command, unexecuted
 
 write
-  init                               install blueprint into this repo
+  init [--hooks]                     install blueprint into this repo
   spec new <feature>
-  req add <feature>/<slug> --ears <s> --fit <s> --confidence stated|derived
+  req add <feature>/<slug> --ears <s> --fit <s> --confidence stated|derived [--evidence <s>]
   req confirm <feature>/<slug>       derived becomes stated. The only way.
+  req correct <feature>/<slug> --ears <s> --reason <s>
+  req bug <feature>/<slug> --reason <s>
+  req fixed <feature>/<slug>
+  ask done <question-slug>
+  harvest scope <glob>
+  hook session|pre-write|done
   amend <feature>/<slug> --ears <s> --reason <s>    the only legal edit
   open add <slug> --question <s> --cost <s> --blocks <globs> [--status] [--pass] [--owner]
   open resolve <slug>
@@ -103,8 +113,16 @@ func (a App) Run(args []string) (int, error) {
 		err = a.open(root, opts.json, args[1:])
 	case "trace":
 		err = a.trace(root, opts.json, args[1:])
+	case "map":
+		err = a.mapCoverage(root, opts.json, args[1:])
+	case "inventory":
+		err = a.inventory(root, opts.json, args[1:])
 	case "ask":
 		err = a.ask(root, opts.json, args[1:])
+	case "harvest":
+		err = a.harvest(root, opts.json, args[1:])
+	case "hook":
+		return a.hook(root, opts.json, args[1:])
 	case "check":
 		return a.check(root, opts.json, args[1:])
 	case "mint":
@@ -290,7 +308,14 @@ func (a App) req(root string, asJSON bool, args []string) error {
 		if !ok {
 			return fmt.Errorf("blueprint/spec:1: requirement not found: %s", args[1])
 		}
-		human := req.Confidence + "\n" + req.EARS + "\nfit: " + req.Fit
+		lines := []string{req.Confidence, req.EARS, "fit: " + req.Fit}
+		if req.Evidence != "" {
+			lines = append(lines, "evidence: "+req.Evidence)
+		}
+		if req.Bug != "" {
+			lines = append(lines, "bug: "+req.Bug)
+		}
+		human := strings.Join(lines, "\n")
 		return a.output(asJSON, req, human)
 	case "next":
 		if len(args) != 1 {
@@ -313,7 +338,7 @@ func (a App) req(root string, asJSON bool, args []string) error {
 		}
 		return a.output(asJSON, nil, "")
 	case "add":
-		pos, flags, err := parseFlags(args[1:], map[string]bool{"--ears": true, "--fit": true, "--confidence": true})
+		pos, flags, err := parseFlags(args[1:], map[string]bool{"--ears": true, "--fit": true, "--confidence": true, "--evidence": true})
 		if err != nil || len(pos) != 1 {
 			if err != nil {
 				return err
@@ -344,6 +369,9 @@ func (a App) req(root string, asJSON bool, args []string) error {
 			}
 		}
 		block := fmt.Sprintf("\n### %s\n`%s`\n%s\nfit: %s\n", slug, flags["--confidence"], flags["--ears"], flags["--fit"])
+		if flags["--evidence"] != "" {
+			block = strings.TrimSuffix(block, "\n") + "\nevidence: " + flags["--evidence"] + "\n"
+		}
 		if err := insertBefore(path, "## Edges", block); err != nil {
 			return err
 		}
@@ -364,6 +392,82 @@ func (a App) req(root string, asJSON bool, args []string) error {
 			return err
 		}
 		return a.output(asJSON, map[string]string{"requirement": args[1], "confidence": "stated"}, args[1])
+	case "correct":
+		pos, flags, err := parseFlags(args[1:], map[string]bool{"--ears": true, "--reason": true})
+		if err != nil || len(pos) != 1 {
+			if err != nil {
+				return err
+			}
+			return fmt.Errorf("req correct requires feature/slug")
+		}
+		if flags["--ears"] == "" || flags["--reason"] == "" || !strings.HasSuffix(flags["--ears"], ".") {
+			return fmt.Errorf("--ears ending in a full stop and --reason are required")
+		}
+		if err := noDash(flags); err != nil {
+			return err
+		}
+		req, ok := reqs[pos[0]]
+		if !ok {
+			return fmt.Errorf("blueprint/spec:1: requirement not found: %s", pos[0])
+		}
+		path := filepath.Join(root, "blueprint", "spec", req.Feature+".md")
+		if err := replaceOnce(path, req.EARS, flags["--ears"], req.Line); err != nil {
+			return err
+		}
+		if req.Confidence == "derived" {
+			if err := replaceOnce(path, "`derived`", "`stated`", req.Line); err != nil {
+				return err
+			}
+		}
+		return a.output(asJSON, map[string]string{"requirement": pos[0], "reason": flags["--reason"]}, pos[0])
+	case "bug":
+		pos, flags, err := parseFlags(args[1:], map[string]bool{"--reason": true})
+		if err != nil || len(pos) != 1 || flags["--reason"] == "" {
+			if err != nil {
+				return err
+			}
+			return fmt.Errorf("req bug requires feature/slug and --reason")
+		}
+		if err := noDash(flags); err != nil {
+			return err
+		}
+		req, ok := reqs[pos[0]]
+		if !ok {
+			return fmt.Errorf("blueprint/spec:1: requirement not found: %s", pos[0])
+		}
+		path := filepath.Join(root, "blueprint", "spec", req.Feature+".md")
+		if req.Bug != "" {
+			return fmt.Errorf("%s:%d: requirement already has a bug marker", path, req.Line)
+		}
+		anchor := "fit: " + req.Fit
+		if req.Evidence != "" {
+			anchor = "evidence: " + req.Evidence
+		}
+		if err := replaceOnce(path, anchor, anchor+"\nbug: "+flags["--reason"], req.Line); err != nil {
+			return err
+		}
+		if req.Confidence == "derived" {
+			if err := replaceOnce(path, "`derived`", "`stated`", req.Line); err != nil {
+				return err
+			}
+		}
+		return a.output(asJSON, map[string]string{"requirement": pos[0], "bug": flags["--reason"]}, pos[0])
+	case "fixed":
+		if len(args) != 2 {
+			return fmt.Errorf("req fixed requires feature/slug")
+		}
+		req, ok := reqs[args[1]]
+		if !ok {
+			return fmt.Errorf("blueprint/spec:1: requirement not found: %s", args[1])
+		}
+		if req.Bug == "" {
+			return fmt.Errorf("%s:%d: requirement has no bug marker", filepath.Join(root, "blueprint", "spec", req.Feature+".md"), req.Line)
+		}
+		path := filepath.Join(root, "blueprint", "spec", req.Feature+".md")
+		if err := replaceOnce(path, "bug: "+req.Bug, "", req.Line); err != nil {
+			return err
+		}
+		return a.output(asJSON, map[string]string{"requirement": args[1], "fixed": "true"}, args[1])
 	default:
 		return fmt.Errorf("unknown req command: %s", args[0])
 	}
@@ -492,9 +596,228 @@ func (a App) trace(root string, asJSON bool, args []string) error {
 	return a.output(asJSON, result, human)
 }
 
+type inventoryItem struct {
+	Path   string `json:"path"`
+	Kind   string `json:"kind"`
+	Tagged bool   `json:"tagged"`
+	Lines  int    `json:"lines"`
+}
+
+func (a App) inventory(root string, asJSON bool, args []string) error {
+	if len(args) != 1 {
+		return fmt.Errorf("inventory requires a path")
+	}
+	prefix := strings.Trim(strings.TrimPrefix(filepath.ToSlash(args[0]), "./"), "/")
+	files, err := repo.Files(root)
+	if err != nil {
+		return err
+	}
+	tags, _ := scan.Tags(root)
+	tagged := map[string]bool{}
+	for _, tag := range tags {
+		tagged[tag.Path] = true
+	}
+	var out []inventoryItem
+	var lines []string
+	for _, file := range files {
+		if file != prefix && !strings.HasPrefix(file, prefix+"/") {
+			continue
+		}
+		data, err := os.ReadFile(filepath.Join(root, filepath.FromSlash(file)))
+		if err != nil {
+			continue
+		}
+		count := 0
+		if len(data) > 0 {
+			count = len(strings.Split(strings.TrimSuffix(string(data), "\n"), "\n"))
+		}
+		kind := "code"
+		if scan.IsTest(file) {
+			kind = "test"
+		}
+		item := inventoryItem{Path: file, Kind: kind, Tagged: tagged[file], Lines: count}
+		out = append(out, item)
+		lines = append(lines, fmt.Sprintf("%s\t%s\t%t\t%d", file, kind, item.Tagged, count))
+	}
+	return a.output(asJSON, out, strings.Join(lines, "\n"))
+}
+
+type mapItem struct {
+	Path     string `json:"path"`
+	Files    int    `json:"files"`
+	Mapped   int    `json:"mapped"`
+	Unmapped int    `json:"unmapped"`
+	Derived  int    `json:"derived"`
+	Open     int    `json:"open"`
+}
+
+func (a App) mapCoverage(root string, asJSON bool, args []string) error {
+	pos, flags, err := parseFlags(args, map[string]bool{"--path": true})
+	if err != nil || len(pos) != 0 {
+		if err != nil {
+			return err
+		}
+		return fmt.Errorf("map accepts flags only")
+	}
+	prefix := strings.Trim(strings.TrimPrefix(filepath.ToSlash(flags["--path"]), "./"), "/")
+	files, err := repo.Files(root)
+	if err != nil {
+		return err
+	}
+	tags, _ := scan.Tags(root)
+	specs, errs := parser.Specs(root)
+	if len(errs) > 0 {
+		return errs[0]
+	}
+	reqs := allRequirements(specs)
+	opens, err := parser.Opens(filepath.Join(root, "blueprint", "OPEN.md"))
+	if err != nil {
+		return err
+	}
+	byFile := map[string][]scan.Tag{}
+	for _, tag := range tags {
+		byFile[tag.Path] = append(byFile[tag.Path], tag)
+	}
+	grouped := map[string]*mapItem{}
+	for _, file := range files {
+		if strings.HasPrefix(file, "blueprint/") || scan.IsTest(file) || (prefix != "" && file != prefix && !strings.HasPrefix(file, prefix+"/")) {
+			continue
+		}
+		dir := filepath.ToSlash(filepath.Dir(file))
+		if dir == "." {
+			dir = "."
+		}
+		item := grouped[dir]
+		if item == nil {
+			item = &mapItem{Path: dir}
+			grouped[dir] = item
+		}
+		item.Files++
+		if len(byFile[file]) == 0 {
+			item.Unmapped++
+			continue
+		}
+		item.Mapped++
+		for _, tag := range byFile[file] {
+			if reqs[tag.Qualified].Confidence == "derived" {
+				item.Derived++
+			}
+			if gates.IsBlocked(opens, tag.Qualified) {
+				item.Open++
+			}
+		}
+	}
+	var keys []string
+	for key := range grouped {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+	var out []mapItem
+	var lines []string
+	for _, key := range keys {
+		item := *grouped[key]
+		out = append(out, item)
+		lines = append(lines, fmt.Sprintf("%s\t%d\t%d\t%d\t%d\t%d", item.Path, item.Files, item.Mapped, item.Unmapped, item.Derived, item.Open))
+	}
+	return a.output(asJSON, out, strings.Join(lines, "\n"))
+}
+
+func (a App) harvest(root string, asJSON bool, args []string) error {
+	if len(args) != 2 || args[0] != "scope" || strings.TrimSpace(args[1]) == "" {
+		return fmt.Errorf("harvest scope requires a glob")
+	}
+	if strings.ContainsAny(args[1], "\u2013\u2014") {
+		return fmt.Errorf("glob contains a forbidden dash character")
+	}
+	path := filepath.Join(root, "blueprint", "PROJECT.md")
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return err
+	}
+	text := string(data)
+	for _, existing := range harvestedScopes(text) {
+		if existing == args[1] {
+			return a.output(asJSON, map[string]string{"scope": args[1]}, args[1])
+		}
+	}
+	lines := strings.Split(strings.TrimSuffix(text, "\n"), "\n")
+	insert := len(lines)
+	found := false
+	for i, line := range lines {
+		if line == "## Harvested" {
+			found = true
+			insert = i + 1
+			for insert < len(lines) && !strings.HasPrefix(lines[insert], "## ") {
+				insert++
+			}
+			break
+		}
+	}
+	add := []string{"- " + args[1]}
+	if !found {
+		add = []string{"", "## Harvested", "- " + args[1]}
+	}
+	lines = append(lines[:insert], append(add, lines[insert:]...)...)
+	if err := atomicfile.Write(path, []byte(strings.Join(lines, "\n")+"\n")); err != nil {
+		return err
+	}
+	return a.output(asJSON, map[string]string{"scope": args[1]}, args[1])
+}
+
+func harvestedScopes(text string) []string {
+	var out []string
+	in := false
+	for _, line := range strings.Split(text, "\n") {
+		if line == "## Harvested" {
+			in = true
+			continue
+		}
+		if in && strings.HasPrefix(line, "## ") {
+			break
+		}
+		if in && strings.HasPrefix(strings.TrimSpace(line), "- ") {
+			out = append(out, strings.TrimSpace(strings.TrimPrefix(strings.TrimSpace(line), "- ")))
+		}
+	}
+	return out
+}
+
 func (a App) ask(root string, asJSON bool, args []string) error {
-	pos, flags, err := parseFlags(args, map[string]bool{"--depth": true, "--batch": true})
-	if err != nil || len(pos) != 1 {
+	if len(args) > 0 && args[0] == "done" {
+		if len(args) != 2 || !validSlug(args[1]) {
+			return fmt.Errorf("ask done requires a question slug")
+		}
+		path := filepath.Join(root, "blueprint", ".grill")
+		existing, err := os.ReadFile(path)
+		if err != nil && !os.IsNotExist(err) {
+			return err
+		}
+		for _, line := range strings.Split(string(existing), "\n") {
+			if line == args[1] {
+				return a.output(asJSON, map[string]string{"question": args[1]}, args[1])
+			}
+		}
+		text := strings.TrimRight(string(existing), "\n")
+		if text != "" {
+			text += "\n"
+		}
+		text += args[1] + "\n"
+		if err := atomicfile.Write(path, []byte(text)); err != nil {
+			return err
+		}
+		return a.output(asJSON, map[string]string{"question": args[1]}, args[1])
+	}
+	pos, flags, err := parseFlags(args, map[string]bool{"--depth": true, "--batch": true, "--for": true, "--all": false, "--confirm": false, "--path": true})
+	if err != nil {
+		return err
+	}
+	if flags["--confirm"] == "true" {
+		if len(pos) != 0 {
+			return fmt.Errorf("ask --confirm accepts flags only")
+		}
+		return a.askConfirm(root, asJSON, flags)
+	}
+	if len(pos) != 1 {
 		if err != nil {
 			return err
 		}
@@ -526,16 +849,83 @@ func (a App) ask(root string, asJSON bool, args []string) error {
 	for _, entry := range opens {
 		asked[entry.Slug] = true
 	}
+	if flags["--all"] != "true" {
+		if data, err := os.ReadFile(filepath.Join(root, "blueprint", ".grill")); err == nil {
+			for _, slug := range strings.Split(string(data), "\n") {
+				asked[strings.TrimSpace(slug)] = true
+			}
+		}
+	}
 	levels := map[string]int{"quick": 0, "standard": 1, "paranoid": 2}
 	out := []questions.Question{}
 	var lines []string
 	for _, q := range bank.Questions {
 		if !asked[q.Slug] && levels[q.Depth] <= levels[depth] && len(out) < batch {
+			q.Ask = replaceBraces(q.Ask, flags["--for"])
 			out = append(out, q)
 			lines = append(lines, q.Slug+": "+q.Ask)
 		}
 	}
 	return a.output(asJSON, out, strings.Join(lines, "\n"))
+}
+
+func (a App) askConfirm(root string, asJSON bool, flags map[string]string) error {
+	batch := 5
+	var err error
+	if flags["--batch"] != "" {
+		batch, err = strconv.Atoi(flags["--batch"])
+		if err != nil || batch < 1 {
+			return fmt.Errorf("--batch requires a positive integer")
+		}
+	}
+	specs, errs := parser.Specs(root)
+	if len(errs) > 0 {
+		return errs[0]
+	}
+	var out []model.Requirement
+	for _, spec := range specs {
+		for _, req := range spec.Requirements {
+			if req.Confidence == "derived" && (flags["--path"] == "" || strings.HasPrefix(req.Evidence, flags["--path"])) {
+				out = append(out, req)
+			}
+		}
+	}
+	// This heuristic decides ordering only and never whether a question is asked.
+	sort.SliceStable(out, func(i, j int) bool { return blastRadius(out[i]) < blastRadius(out[j]) })
+	if len(out) > batch {
+		out = out[:batch]
+	}
+	var lines []string
+	for _, req := range out {
+		lines = append(lines, req.Qualified()+": "+req.Evidence)
+	}
+	return a.output(asJSON, out, strings.Join(lines, "\n"))
+}
+
+func blastRadius(req model.Requirement) int {
+	text := strings.ToLower(req.Slug + " " + req.EARS + " " + req.Evidence)
+	groups := [][]string{
+		{"money", "payment", "price", "billing", "charge", "refund", "currency", "invoice"},
+		{"auth", "login", "permission", "access", "role", "session", "token"},
+		{"delete", "deletion", "data loss", "erase", "purge", "destroy"},
+	}
+	for rank, words := range groups {
+		for _, word := range words {
+			if strings.Contains(text, word) {
+				return rank
+			}
+		}
+	}
+	return len(groups)
+}
+
+var bracesRE = regexp.MustCompile(`\{[^{}]+\}`)
+
+func replaceBraces(text, value string) string {
+	if value == "" {
+		return text
+	}
+	return bracesRE.ReplaceAllString(text, value)
 }
 
 func (a App) check(root string, asJSON bool, args []string) (int, error) {
@@ -716,8 +1106,12 @@ func (a App) amend(root string, asJSON bool, args []string) error {
 }
 
 func (a App) init(root string, asJSON bool, args []string) error {
-	if len(args) != 0 {
-		return fmt.Errorf("init takes no arguments")
+	pos, flags, err := parseFlags(args, map[string]bool{"--hooks": false})
+	if err != nil || len(pos) != 0 {
+		if err != nil {
+			return err
+		}
+		return fmt.Errorf("init accepts --hooks only")
 	}
 	var written []string
 	agentBlock, err := assets.FS.ReadFile("templates/AGENTS.blueprint.md")
@@ -775,8 +1169,229 @@ func (a App) init(root string, asJSON bool, args []string) error {
 	if err := os.MkdirAll(filepath.Join(root, "blueprint", "decisions"), 0o755); err != nil {
 		return err
 	}
+	if flags["--hooks"] == "true" {
+		changed, err := mergeHookSettings(root)
+		if err != nil {
+			return err
+		}
+		if changed {
+			written = append(written, ".claude/settings.json")
+		}
+	}
 	sort.Strings(written)
 	return a.output(asJSON, map[string]any{"written": written}, strings.Join(written, "\n"))
+}
+
+func mergeHookSettings(root string) (bool, error) {
+	path := filepath.Join(root, ".claude", "settings.json")
+	settings := map[string]any{}
+	if data, err := os.ReadFile(path); err == nil {
+		if err := json.Unmarshal(data, &settings); err != nil {
+			return false, fmt.Errorf("%s:1: invalid JSON: %v", path, err)
+		}
+	} else if !os.IsNotExist(err) {
+		return false, err
+	}
+	hooks, ok := settings["hooks"].(map[string]any)
+	if !ok {
+		hooks = map[string]any{}
+		settings["hooks"] = hooks
+	}
+	entries := []struct {
+		event   string
+		matcher string
+		command string
+	}{
+		{"SessionStart", "", "blueprint hook session"},
+		{"PreToolUse", "Edit|Write|MultiEdit", "blueprint hook pre-write"},
+		{"Stop", "", "blueprint hook done"},
+	}
+	changed := false
+	for _, entry := range entries {
+		list, _ := hooks[entry.event].([]any)
+		if containsCommand(list, entry.command) {
+			continue
+		}
+		item := map[string]any{"hooks": []any{map[string]any{"type": "command", "command": entry.command}}}
+		if entry.matcher != "" {
+			item["matcher"] = entry.matcher
+		}
+		hooks[entry.event] = append(list, item)
+		changed = true
+	}
+	if !changed {
+		return false, nil
+	}
+	data, err := json.MarshalIndent(settings, "", "  ")
+	if err != nil {
+		return false, err
+	}
+	data = append(data, '\n')
+	return true, atomicfile.Write(path, data)
+}
+
+func containsCommand(value any, command string) bool {
+	switch value := value.(type) {
+	case map[string]any:
+		if value["command"] == command {
+			return true
+		}
+		for _, child := range value {
+			if containsCommand(child, command) {
+				return true
+			}
+		}
+	case []any:
+		for _, child := range value {
+			if containsCommand(child, command) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func (a App) hook(root string, asJSON bool, args []string) (int, error) {
+	if len(args) != 1 || !oneOf(args[0], "session", "pre-write", "done") {
+		return 1, fmt.Errorf("hook requires session, pre-write, or done")
+	}
+	in := a.In
+	if in == nil {
+		in = os.Stdin
+	}
+	payload, err := io.ReadAll(io.LimitReader(in, 1<<20))
+	if err != nil {
+		return 1, err
+	}
+	switch args[0] {
+	case "pre-write":
+		if os.Getenv("BLUEPRINT_AMEND") == "1" {
+			return 0, nil
+		}
+		var value any
+		if len(strings.TrimSpace(string(payload))) > 0 {
+			if err := json.Unmarshal(payload, &value); err != nil {
+				return 1, fmt.Errorf("stdin:1: invalid hook JSON: %v", err)
+			}
+		}
+		file := findJSONText(value, "file_path")
+		if strings.Contains(filepath.ToSlash(file), "/blueprint/spec/") || strings.HasPrefix(filepath.ToSlash(file), "blueprint/spec/") {
+			return hookBlock(a.Err, "BLOCKED: blueprint/spec/ is not directly editable.")
+		}
+		if strings.Contains(filepath.ToSlash(file), "/blueprint/decisions/") || strings.HasPrefix(filepath.ToSlash(file), "blueprint/decisions/") {
+			return hookBlock(a.Err, "BLOCKED: decision records are immutable.")
+		}
+	case "session":
+		var out strings.Builder
+		out.WriteString("BLUEPRINT ACTIVE. Specs in blueprint/ are source of truth; code is derivative.\n")
+		opens, _ := parser.Opens(filepath.Join(root, "blueprint", "OPEN.md"))
+		n := 0
+		for _, entry := range opens {
+			if entry.Status == "OPEN" && n < 5 {
+				if n == 0 {
+					out.WriteString("\nOpen questions blocking work:\n")
+				}
+				out.WriteString(entry.Slug + "\n")
+				n++
+			}
+		}
+		results := gates.Run(root, "")
+		n = 0
+		for _, result := range results {
+			if result.Status == "fail" && n < 5 {
+				if n == 0 {
+					out.WriteString("\nFailing gates:\n")
+				}
+				out.WriteString(result.Gate + ": fail\n")
+				n++
+			}
+		}
+		specs, errs := parser.Specs(root)
+		if len(errs) == 0 {
+			tags, _ := scan.Tags(root)
+			for _, spec := range specs {
+				if spec.Status == "shipped" || !depsMet(root, spec, specs) {
+					continue
+				}
+				found := false
+				for _, req := range spec.Requirements {
+					if req.Confidence == "stated" && req.SupersededBy == "" && !covered(tags, req.Qualified()) && !gates.IsBlocked(opens, req.Qualified()) {
+						out.WriteString("\nNext implementable requirement: " + req.Qualified() + "\n")
+						found = true
+						break
+					}
+				}
+				if found {
+					break
+				}
+			}
+		}
+		fmt.Fprint(a.Out, out.String())
+	case "done":
+		var value any
+		_ = json.Unmarshal(payload, &value)
+		session := findJSONText(value, "session_id")
+		if session == "" {
+			session = os.Getenv("CLAUDE_CODE_SESSION_ID")
+		}
+		if session == "" {
+			session = "default"
+		}
+		sentinel := filepath.Join(os.TempDir(), "blueprint-done-gate-"+safeName(session))
+		if info, err := os.Stat(sentinel); err == nil && time.Since(info.ModTime()) < time.Minute {
+			return 0, nil
+		}
+		results := gates.Run(root, "")
+		var failures []string
+		for _, result := range results {
+			if result.Status == "fail" {
+				failures = append(failures, result.Gate+": fail")
+			}
+		}
+		if len(failures) > 0 {
+			if err := atomicfile.Write(sentinel, []byte("blocked\n")); err != nil {
+				return 1, err
+			}
+			return hookBlock(a.Err, "BLOCKED: blueprint gates are failing, so this is not done.\n\n"+strings.Join(failures, "\n"))
+		}
+	}
+	if asJSON {
+		return 0, a.output(true, map[string]bool{"allow": true}, "")
+	}
+	return 0, nil
+}
+
+func findJSONText(value any, key string) string {
+	switch value := value.(type) {
+	case map[string]any:
+		if text, ok := value[key].(string); ok {
+			return text
+		}
+		for _, child := range value {
+			if text := findJSONText(child, key); text != "" {
+				return text
+			}
+		}
+	case []any:
+		for _, child := range value {
+			if text := findJSONText(child, key); text != "" {
+				return text
+			}
+		}
+	}
+	return ""
+}
+
+func safeName(value string) string {
+	return regexp.MustCompile(`[^a-zA-Z0-9._-]+`).ReplaceAllString(value, "_")
+}
+
+func hookBlock(errOut io.Writer, reason string) (int, error) {
+	if errOut == nil {
+		errOut = os.Stderr
+	}
+	_, err := fmt.Fprintln(errOut, reason)
+	return 2, err
 }
 
 func parseFlags(args []string, allowed map[string]bool) ([]string, map[string]string, error) {

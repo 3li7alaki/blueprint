@@ -88,6 +88,24 @@ on demand.
 
 Depth dial `quick | standard | paranoid` filters the bank. It never skips a pass.
 
+## Brownfield
+
+When the code exists first, the frame and nouns passes are replaced by a harvest. The rule that
+makes it safe is already in the confidence model: code is evidence of what a system does and
+never of what it should do, so everything harvested is `derived`, carries `evidence: file:line`,
+and stays unimplementable until a human confirms it.
+
+Confirmation has three outcomes, not two. `req confirm` when the code is right, `req correct`
+when it should behave differently, `req bug` when nobody meant this. The last two produce a
+`stated` requirement the code fails, which is the point: a red gate and a slug beat a suspicion.
+
+Harvest is scoped with `harvest scope`, one area at a time, and the `unmapped` gate only looks
+inside those globs. A repo-wide harvest yields hundreds of unconfirmed requirements nobody
+reads, which is worse than no spec because it looks like one.
+
+The binary never reads code semantically. It ships `inventory` and `map`; the `harvest` skill
+does the reading. Teaching a Go binary to parse every framework is a bottomless pit.
+
 ## Handoff to mint
 
 One requirement, one mint unit:

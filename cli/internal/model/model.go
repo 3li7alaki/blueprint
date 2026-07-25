@@ -6,6 +6,8 @@ type Requirement struct {
 	Confidence   string `json:"confidence"`
 	EARS         string `json:"ears"`
 	Fit          string `json:"fit"`
+	Evidence     string `json:"evidence,omitempty"`
+	Bug          string `json:"bug,omitempty"`
 	SupersededBy string `json:"supersededBy,omitempty"`
 	Line         int    `json:"-"`
 }

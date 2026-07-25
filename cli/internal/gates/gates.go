@@ -14,7 +14,7 @@ import (
 	"blueprint/internal/scan"
 )
 
-var Names = []string{"coverage", "orphan", "budget", "blocked", "derived", "shape", "dash", "drift"}
+var Names = []string{"coverage", "orphan", "budget", "blocked", "derived", "shape", "dash", "unmapped", "bug", "drift"}
 
 type Result struct {
 	Gate      string   `json:"gate"`
@@ -96,6 +96,14 @@ func Run(root, only string) []Result {
 			}
 		case "dash":
 			offenders = dash(root)
+		case "unmapped":
+			offenders = unmapped(root, tags)
+		case "bug":
+			for _, req := range reqs {
+				if req.Bug != "" {
+					offenders = append(offenders, req.Qualified())
+				}
+			}
 		case "drift":
 			for _, spec := range specs {
 				info, err := os.Stat(spec.Path)
@@ -123,6 +131,55 @@ func Run(root, only string) []Result {
 		results = append(results, Result{Gate: name, Status: status, Offenders: offenders})
 	}
 	return results
+}
+
+func unmapped(root string, tags []scan.Tag) []string {
+	data, err := os.ReadFile(filepath.Join(root, "blueprint", "PROJECT.md"))
+	if err != nil {
+		return nil
+	}
+	scopes := harvested(string(data))
+	if len(scopes) == 0 {
+		return nil
+	}
+	tagged := map[string]bool{}
+	for _, tag := range tags {
+		if !tag.Test {
+			tagged[tag.Path] = true
+		}
+	}
+	files, _ := repo.Files(root)
+	var offenders []string
+	for _, file := range files {
+		if scan.IsTest(file) || strings.HasPrefix(file, "blueprint/") {
+			continue
+		}
+		for _, scope := range scopes {
+			if scan.MatchGlob(scope, file) && !tagged[file] {
+				offenders = append(offenders, file)
+				break
+			}
+		}
+	}
+	return offenders
+}
+
+func harvested(data string) []string {
+	var out []string
+	in := false
+	for _, line := range strings.Split(data, "\n") {
+		if line == "## Harvested" {
+			in = true
+			continue
+		}
+		if in && strings.HasPrefix(line, "## ") {
+			break
+		}
+		if in && strings.HasPrefix(strings.TrimSpace(line), "- ") {
+			out = append(out, strings.TrimSpace(strings.TrimPrefix(strings.TrimSpace(line), "- ")))
+		}
+	}
+	return out
 }
 
 func IsBlocked(opens []model.Open, qualified string) bool {
