@@ -68,6 +68,49 @@ is a red gate and a slug to fix against, rather than a vague sense that somethin
 time, the one you are about to touch. A repo-wide harvest produces hundreds of unconfirmed
 requirements nobody reads, which is worse than no spec because it looks like one.
 
+## Adopting an existing spec
+
+Some repos already have specs, and better ones than a first grill would produce. Harvesting
+requirements from code in that situation is the wrong move twice over: it re-derives what a
+human already stated, and it produces a second spec that looks as authoritative as the real one
+while being strictly weaker.
+
+Adoption is a one-time conversion, not a sync. Two spec systems always drift, and the drift is
+invisible precisely because both look official. So the existing document is converted and then
+stops being normative. It may be deleted, or left as narrative that no gate reads, but it is
+never a second place requirements live.
+
+What already has a home, so needs no new grammar:
+
+| in an existing spec | becomes |
+|---|---|
+| acceptance criteria | requirements, `stated`, because a human wrote them |
+| a blocked or unanswered item | an `OPEN.md` entry, priced |
+| rationale, research notes, rejected options | a decision record |
+| an unmitigated risk | an `OPEN.md` entry, since that is a question with a cost |
+| a mitigated risk | the `because` line of the decision that mitigated it |
+| in scope, out of scope | the spec's own `Out of scope` section |
+
+Everything adopted carries `evidence:` pointing at the source document and line, so a reader can
+check the conversion rather than trust it.
+
+Confidence is `stated`, not `derived`. This is the one place `stated` is correct without a live
+human in the loop: the requirement was written by a person, and adoption is a translation of
+their words, not an inference from behaviour. Adopting as `derived` would force a human to
+re-confirm decisions they already made, which is how a migration stalls.
+
+Existing citations in code are rewritten in the same pass, not kept alive by a mapping. A repo
+that cites `AC-5` in comments gets those comments replaced with the `@spec` tag for the
+requirement that criterion became. A compatibility layer would be a second citation scheme that
+still counts, which is the same redundancy as a second spec, one layer down. The edit is small:
+citations cluster in a handful of files, and anything the conversion misses shows up as an
+uncovered requirement rather than a silent wrong link.
+
+The reading is done by an agent under the `adopt` skill, for the same reason harvest is: the
+binary must not learn to parse thirteen house styles of markdown. Nothing in adoption needs a
+new command; it is `req add`, `open add` and `decide` driven from what the document already
+says.
+
 ## Write
 
 Writers are the only legal mutation path for `blueprint/`. They preserve section order, never
@@ -118,6 +161,7 @@ their own atomic replacements.
 | `dash` | any tracked file contains an em dash or en dash |
 | `unmapped` | a non-test file inside a harvested scope carries no `@spec` tag |
 | `bug` | a requirement carries a `bug:` marker, meaning the code is known to violate it |
+
 | `drift` | a spec file is newer than the newest file carrying one of its `@spec` tags |
 
 Exit code is 0 or 1. `--json` emits `{gate, status, offenders[]}` per gate.
@@ -236,6 +280,7 @@ un-harvested legacy tree never fails a gate and the list itself is the progress 
 An append-only ledger, one question slug per line, written when a bank question has been asked
 and dealt with. Not a document, never read by a human, and the reason a grill resumes where it
 stopped instead of restarting at question one.
+
 
 ## Implementation notes
 

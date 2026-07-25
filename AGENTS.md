@@ -106,6 +106,22 @@ reads, which is worse than no spec because it looks like one.
 The binary never reads code semantically. It ships `inventory` and `map`; the `harvest` skill
 does the reading. Teaching a Go binary to parse every framework is a bottomless pit.
 
+## Adopting an existing spec
+
+A repo that already has written acceptance criteria does not get harvested. Harvesting there
+re-derives what a human already stated and leaves a second, weaker spec that looks equally
+official. Adoption converts the criteria instead, as `stated`, because a person wrote them, each
+carrying `evidence:` back to the source line and its original id.
+
+Adoption is a one-time conversion, never a sync. The source document stops being normative:
+deleted, or reduced to narrative that says plainly it is not the spec. Two live specs drift, and
+the drift is invisible because both look authoritative. Old citations in code are rewritten in
+the same pass rather than kept alive by a mapping, since a second citation scheme that still
+counts is the same redundancy one layer down.
+
+Nothing in adoption needs a new command. It is `req add`, `open add` and `decide`, driven by the
+`adopt` skill reading what the document already says.
+
 ## Handoff to mint
 
 One requirement, one mint unit:

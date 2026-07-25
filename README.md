@@ -113,6 +113,24 @@ more than a hundred requirements describing code that was already fine.
 You never spec the whole codebase. You harvest the area you are about to touch, and `map` gives
 you a number that goes up.
 
+### Unless you already have specs
+
+Then harvesting is the wrong move. It re-derives what someone already wrote and leaves a second
+spec that looks as official as the real one while being weaker.
+
+```sh
+/blueprint-adopt docs/specs/01-multitenancy.md
+```
+
+Acceptance criteria become `stated` requirements, because a person wrote them. Blocked items and
+unmitigated risks become priced `OPEN.md` entries. Rationale and rejected options become decision
+records. Everything carries `evidence:` back to the source line and its original id, so the
+conversion can be checked rather than trusted.
+
+Then the original stops being normative: deleted, or reduced to narrative that says so plainly.
+Old citations in the code get rewritten in the same pass, not kept alive by a mapping. Two live
+specs drift, and the drift is invisible precisely because both look authoritative.
+
 ## Why agents actually obey it
 
 Because it isn't written as a request. Models follow roughly 150 to 200 instructions before
