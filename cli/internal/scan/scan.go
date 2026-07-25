@@ -13,6 +13,25 @@ import (
 var tagRE = regexp.MustCompile(`@spec ([a-z0-9][a-z0-9-]*/[a-z0-9][a-z0-9-]*)`)
 var testRE = regexp.MustCompile(`(^|/)(tests?|__tests__|spec)/|(\.test\.[a-z]+|\.spec\.[a-z]+|_test\.[a-z]+)$|(^|/)test_[^/]+\.py$`)
 
+// A tag counts only on a line that begins, after whitespace, with a comment marker. See
+// blueprint/decisions/tags-live-in-comments.md.
+//
+// Without this rule a tag inside a string literal reads as a claim about a requirement, so any
+// test that builds a fixture repo trips the orphan gate. The obvious alternative, exempting
+// test paths, is worse: tests are exactly where real tags must live, because coverage is
+// measured there, and any path a gate cannot see is a place untraceable code can hide.
+var commentMarkers = []string{"//", "#", "--", "/*", "*", "<!--", ";", "%", "\"\"\""}
+
+func inComment(line string) bool {
+	trimmed := strings.TrimLeft(line, " \t")
+	for _, marker := range commentMarkers {
+		if strings.HasPrefix(trimmed, marker) {
+			return true
+		}
+	}
+	return false
+}
+
 type Tag struct {
 	Qualified string
 	Path      string
@@ -35,8 +54,13 @@ func Tags(root string) ([]Tag, error) {
 			continue
 		}
 		info, _ := os.Stat(filepath.Join(root, filepath.FromSlash(rel)))
-		for _, match := range tagRE.FindAllStringSubmatch(string(data), -1) {
-			tags = append(tags, Tag{Qualified: match[1], Path: rel, Test: IsTest(rel), ModTime: info.ModTime().UnixNano()})
+		for _, line := range strings.Split(string(data), "\n") {
+			if !inComment(line) {
+				continue
+			}
+			for _, match := range tagRE.FindAllStringSubmatch(line, -1) {
+				tags = append(tags, Tag{Qualified: match[1], Path: rel, Test: IsTest(rel), ModTime: info.ModTime().UnixNano()})
+			}
 		}
 	}
 	sort.Slice(tags, func(i, j int) bool {
