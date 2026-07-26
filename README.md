@@ -2,6 +2,10 @@
 
 > Grill the idea until it has no holes, then hand your agents a spec they can't misread.
 
+[![License: MIT](https://img.shields.io/badge/license-MIT-black)](LICENSE)
+[![Site](https://img.shields.io/badge/site-blueprint.area--51.cloud-9c4221)](https://blueprint.area-51.cloud)
+[![Ko-fi](https://img.shields.io/badge/Ko--fi-support-ff5e5b?logo=kofi&logoColor=white)](https://ko-fi.com/3li7alaki)
+
 AI doesn't fail your project at the coding step. It fails at the step where nobody said what
 "done" meant, so the model guessed: plausibly, confidently, and differently each session.
 
@@ -189,6 +193,23 @@ about to build has been fully described first.
 See [AGENTS.md](AGENTS.md) for the operating contract and
 [docs/principles.md](docs/principles.md) for the boundaries.
 
+[blueprint.area-51.cloud](https://blueprint.area-51.cloud) is the overview, with
+the rest of the lab at [area-51.cloud](https://area-51.cloud).
+
 Prior art worth reading: [EARS](https://alistairmavin.com/ears/) ·
 [Volere](https://www.volere.org/templates/volere-requirements-specification-template/) ·
 [Spec Kit](https://github.com/github/spec-kit) · [AGENTS.md](https://agents.md)
+
+## Support
+
+blueprint is free and MIT licensed, and there is no pricing page. If it saved you
+an afternoon, that is worth about the price of a coffee.
+
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/3li7alaki)
+
+Need something like this built for your own stack? Commissions are open at
+[ko-fi.com/3li7alaki](https://ko-fi.com/3li7alaki).
+
+## License
+
+MIT. See [LICENSE](LICENSE).
