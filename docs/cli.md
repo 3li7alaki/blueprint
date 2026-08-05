@@ -322,9 +322,11 @@ web
 bare words. `Conversion & proof` belongs to the brand register and is deleted outright for a
 product.
 
-Created by `look new` and filled in by the look pass, which keeps priced `OPEN.md` entries for
-what nobody decided and a decision record per visual choice. Once the file exists it is guarded,
-so later changes go through an amend rather than a helpful edit.
+Created by `look new`, or by whichever design skill ran the interview: a tool built for that job
+asks better questions than a bank kept beside a spec parser, and the look pass hands the interview
+over where one is installed. What blueprint keeps is the half no interview has, priced `OPEN.md`
+entries for what nobody decided and a decision record per visual choice. Once the file exists it
+is guarded, so later changes go through an amend rather than a helpful edit.
 
 `DESIGN.md` beside it is not blueprint's. It records what the interface actually is, generated
 from the code by whatever builds the screens, and no gate reads it.

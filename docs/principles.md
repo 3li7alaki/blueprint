@@ -17,7 +17,11 @@ mint owns completion: evidence, provenance, independence, the floor, snapshots, 
 freshness.
 
 blueprint owns definition: the question bank, specs, requirement slugs, the unknowns register,
-conventions, review lenses, and repo-side traceability gates.
+conventions, review lenses, repo-side traceability gates, and the stated half of the design
+contract in `PRODUCT.md`.
+
+Design tools own execution: the screens, and the `DESIGN.md` they derive from the code they wrote.
+blueprint records the choice and its reason. The tool records the result. One writer per file.
 
 Three layers, no overlap. blueprint never issues a receipt. mint never asks a founder a question.
 

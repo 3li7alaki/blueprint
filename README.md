@@ -44,8 +44,9 @@ passes: frame, boundaries, nouns, surfaces, rules, edges, gates. Each question h
 condition. It doesn't move on until the answer clears it.
 
 Anything with a screen gets an eighth, `/blueprint look`: register, platform, the scene someone
-is in when they open it, personality, anti-references, principles, palette, type, motion. It takes
-the half a set of questions does not: "we never decided" becomes a
+is in when they open it, personality, anti-references, principles, palette, type, motion. If you
+have a design skill installed, it runs that interview, because it asks better than a bank kept
+beside a spec parser. blueprint takes the half no interview has: "we never decided" becomes a
 priced `OPEN.md` entry instead of a guess in CSS, every visual choice becomes a decision record
 carrying its reason, and the token home you name switches on a gate that keeps raw hex out of
 components.

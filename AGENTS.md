@@ -96,9 +96,11 @@ one pass that is skipped whole, and only where no spec declares a surface: a CLI
 
 The seven settle what the product does. `look` settles what it is like to meet.
 
-A shrug becomes an `OPEN.md` entry with a price and a `blocks` glob, and every visual choice
-becomes a decision record carrying its reason. An interview ends when the talking stops. Only a
-price makes silence expensive.
+It does not own the interview. Where a design skill is installed, that skill asks, because its
+questions are better than a bank maintained beside a spec parser. What `look` owns is the half no
+interview has: a shrug becomes an `OPEN.md` entry with a price and a `blocks` glob, and every
+visual choice becomes a decision record carrying its reason. An interview ends when the talking
+stops. Only a price makes silence expensive.
 
 Two files, split exactly as `stated` and `derived` are:
 
