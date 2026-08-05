@@ -1,0 +1,131 @@
+pass = "look"
+produces = "PRODUCT.md: register, platform, users, positioning, personality, anti-references, principles, accessibility. Decision records: theme, colour strategy, type, motion, token home."
+note = "Skipped entirely when no spec declares a surface. A CLI has no register. Questions marked brand-only are dropped once the register answer is `product`, and the visual questions produce decision records, never prose in a spec: a colour strategy is a decision with a rationale, and a rationale is what stops the next agent quietly re-deciding it. Where a dedicated design skill is installed it asks these better than this file does, and the look skill hands the interview to it. What never moves is the cost line: an interview ends when the talking stops, and only a price makes a shrug expensive. Read the wording here as the fallback and the costs as the point."
+
+[[q]]
+slug = "register"
+depth = "quick"
+ask = "Is the design the product here (marketing, landing, campaign, portfolio) or does the design serve the product (app, admin, dashboard, tool)?"
+exit = "one word, brand or product"
+cost = "every later answer is graded against the wrong bar, so the whole pass is rerun"
+blocks = ["*"]
+
+[[q]]
+slug = "platform"
+depth = "quick"
+ask = "Does this ship as a website, an iOS app, an Android app, or one codebase adapting to both?"
+exit = "one of web, ios, android, adaptive, decided by the design language it renders and never by the toolchain"
+cost = "a web-shaped interface shipped into a native shell, which users read as broken rather than as different"
+blocks = ["*"]
+
+[[q]]
+slug = "user-context"
+depth = "quick"
+ask = "Where is someone physically when they open this, and what are they doing at the same time?"
+exit = "a scene: place, light, device, and whether they have both hands and full attention"
+cost = "the theme, density and touch target sizes are all guessed, and all guessed for a calm desk"
+blocks = ["*"]
+
+[[q]]
+slug = "positioning"
+depth = "quick"
+ask = "In one line, what does this do that the alternatives do not? "
+exit = "one sentence a user would repeat, not an internal differentiator"
+cost = "every screen argues something slightly different and none of them lands"
+blocks = ["*"]
+
+[[q]]
+slug = "token-home"
+depth = "quick"
+ask = "Which single file holds the colours, spacing and type scale, and which globs hold the components that consume them?"
+exit = "one path plus one or more globs, or an explicit 'none yet, create it at <path>'"
+cost = "raw hex values spread across every component, so a rebrand becomes a find and replace with no ground truth"
+blocks = []
+
+[[q]]
+slug = "personality"
+depth = "standard"
+ask = "Three words for how this should come across, and one feeling someone should leave with."
+exit = "three adjectives that could not describe the competitor, plus one feeling"
+cost = "a competent interface with no voice, which reads as a template"
+blocks = []
+
+[[q]]
+slug = "anti-references"
+depth = "standard"
+ask = "Name something specific this must not look like, and say what about it is wrong for you."
+exit = "a named product, site or pattern with the trait rejected; 'not generic' does not count"
+cost = "the default aesthetic of the moment arrives by accident and nobody can say why it is wrong"
+blocks = []
+
+[[q]]
+slug = "design-principles"
+depth = "standard"
+ask = "What are three rules this interface should follow even when they cost effort?"
+exit = "three arguable strategic rules, each of which forbids something a reasonable person might do"
+cost = "no tiebreaker for the hundred small decisions nobody will ask you about"
+blocks = []
+
+[[q]]
+slug = "accessibility-floor"
+depth = "standard"
+ask = "What is the accessibility floor, and does anyone use this with a screen reader, keyboard only, or reduced motion?"
+exit = "a named level such as WCAG 2.2 AA, plus any known user need"
+cost = "an audit late in the build that reopens layout, colour and motion at once"
+blocks = ["*"]
+
+[[q]]
+slug = "colour-strategy"
+depth = "standard"
+ask = "How much colour carries the surface: tinted neutrals with one accent, one saturated colour across half the page, a full palette of named roles, or colour as the surface itself?"
+exit = "one of restrained, committed, full-palette, drenched, and the reason it fits the scene"
+cost = "colour applied per component by whoever is editing, so the palette is decided by accretion"
+blocks = []
+
+[[q]]
+slug = "theme-default"
+depth = "standard"
+ask = "Light or dark, and what about the scene from the context question forces that answer?"
+exit = "one of light, dark, both-with-a-default, tied back to the scene rather than to taste"
+cost = "a theme chosen by category reflex, which is the single most recognisable AI tell"
+blocks = []
+
+[[q]]
+slug = "type-direction"
+depth = "standard"
+ask = "One family in several weights, or a pairing on a contrast axis such as serif with sans?"
+exit = "a direction plus the axis, or named families if already decided"
+cost = "two similar sans fonts pulling against each other, which reads as an accident"
+blocks = []
+
+[[q]]
+slug = "motion-energy"
+depth = "paranoid"
+ask = "Should this feel still, responsive, or expressive, and what must never move?"
+exit = "one of still, responsive, expressive, plus anything that stays put"
+cost = "motion added per component at the end, uniformly, which is the reflex everyone recognises"
+blocks = []
+
+[[q]]
+slug = "primary-action"
+depth = "standard"
+ask = "Brand only. What is the one action a visitor should take, and what is the fallback for someone not ready?"
+exit = "a primary and a secondary action, each a real destination"
+cost = "a page that informs and converts nobody"
+blocks = []
+
+[[q]]
+slug = "belief-ladder"
+depth = "paranoid"
+ask = "Brand only. What must a visitor believe, in order, before that action makes sense to them?"
+exit = "an ordered list of beliefs, each one a section has to earn"
+cost = "sections ordered by what is easy to write instead of by what has to be believed"
+blocks = []
+
+[[q]]
+slug = "proof-on-hand"
+depth = "paranoid"
+ask = "Brand only. What proof exists today: testimonials, numbers, logos, case studies?"
+exit = "the real assets, or an explicit 'none', which is itself a design constraint"
+cost = "placeholder proof that ships, or a layout built around evidence that never arrives"
+blocks = []

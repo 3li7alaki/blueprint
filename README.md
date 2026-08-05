@@ -43,6 +43,13 @@ blueprint attacks all three at the source: the ambiguity that made guessing nece
 passes: frame, boundaries, nouns, surfaces, rules, edges, gates. Each question has an exit
 condition. It doesn't move on until the answer clears it.
 
+Anything with a screen gets an eighth, `/blueprint look`: register, platform, the scene someone
+is in when they open it, personality, anti-references, principles, palette, type, motion. It takes
+the half a set of questions does not: "we never decided" becomes a
+priced `OPEN.md` entry instead of a guess in CSS, every visual choice becomes a decision record
+carrying its reason, and the token home you name switches on a gate that keeps raw hex out of
+components.
+
 Unanswered questions don't vanish and they don't get invented. They land in `OPEN.md` with a
 price tag:
 
@@ -74,6 +81,8 @@ numbers. `auth-magic-link/link-expires-in-15-min` survives inserts, deletes and 
 | budget | a doc grew past its line limit |
 | blocked | work started on something `OPEN.md` blocks |
 | drift | a rule was reworded and its code stayed put |
+| look | there are screens and nobody said who they're for |
+| tokens | a raw hex or font stack leaked into a component |
 
 Your traceability matrix is `rg '@spec' | sort`. No database, no tool, no ceremony.
 

@@ -26,6 +26,9 @@ Run these in order. Stop at the first failure and report it. Do not accumulate a
    taste.
 7. **Spec integrity.** The diff must not modify `blueprint/spec/**`. A spec change riding along
    with an implementation is the code rewriting its own acceptance criteria.
+8. **Look.** Interface diffs only. Each surface it touches still answers all five states, no
+   colour or font stack was written outside the token home, and nothing in it contradicts a
+   `PRODUCT.md` principle or lands on a named anti-reference.
 
 ## Verdict
 

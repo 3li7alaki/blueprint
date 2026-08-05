@@ -14,7 +14,7 @@ import (
 	"blueprint/internal/scan"
 )
 
-var Names = []string{"coverage", "orphan", "budget", "blocked", "derived", "shape", "dash", "unmapped", "bug", "drift"}
+var Names = []string{"coverage", "orphan", "budget", "blocked", "derived", "shape", "dash", "unmapped", "bug", "drift", "look", "tokens"}
 
 type Result struct {
 	Gate      string   `json:"gate"`
@@ -63,6 +63,9 @@ func Run(root, only string) []Result {
 			}
 		case "budget":
 			budgets := map[string]int{"blueprint/PROJECT.md": 60, "blueprint/CONVENTIONS.md": 80, "blueprint/REVIEW.md": 60}
+			if path, ok := parser.ProductPath(root); ok {
+				budgets[rel(root, path)] = 60
+			}
 			files, _ := filepath.Glob(filepath.Join(root, "blueprint", "spec", "*.md"))
 			for _, file := range files {
 				rel, _ := filepath.Rel(root, file)
@@ -106,6 +109,10 @@ func Run(root, only string) []Result {
 			}
 		case "drift":
 			offenders = drift(root, specs, tags)
+		case "look":
+			offenders = look(root, specs)
+		case "tokens":
+			offenders = tokens(root)
 		}
 		sort.Strings(offenders)
 		status := "pass"

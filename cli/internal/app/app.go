@@ -53,11 +53,13 @@ read
   inventory <path>                   files, kind, tags, and line counts
   ask <pass> [--depth quick|standard|paranoid] [--batch n] [--for value] [--all]
   ask --confirm [--path p] [--batch n]
-  check [--gate coverage|orphan|budget|blocked|derived|shape|dash|unmapped|bug|drift]
+  look show [--section register|platform|users|positioning|principles|...]
+  check [--gate coverage|orphan|budget|blocked|derived|shape|dash|unmapped|bug|drift|look|tokens]
   mint <feature>/<slug>              prints the mint unit command, unexecuted
 
 write
   init [--hooks]                     install blueprint into this repo
+  look new                           PRODUCT.md from the template, for the look pass to fill
   spec new <feature>
   req add <feature>/<slug> --ears <s> --fit <s> --confidence stated|derived [--evidence <s>]
   req confirm <feature>/<slug>       derived becomes stated. The only way.
@@ -107,6 +109,8 @@ func (a App) Run(args []string) (int, error) {
 		err = a.init(root, opts.json, args[1:])
 	case "spec":
 		err = a.spec(root, opts.json, args[1:])
+	case "look":
+		err = a.look(root, opts.json, args[1:])
 	case "req":
 		err = a.req(root, opts.json, args[1:])
 	case "open":
@@ -1280,6 +1284,9 @@ func (a App) hook(root string, asJSON bool, args []string) (int, error) {
 		}
 		if strings.Contains(filepath.ToSlash(file), "/blueprint/decisions/") || strings.HasPrefix(filepath.ToSlash(file), "blueprint/decisions/") {
 			return hookBlock(a.Err, "BLOCKED: decision records are immutable.")
+		}
+		if file != "" && productGuarded(root, file) {
+			return hookBlock(a.Err, "BLOCKED: PRODUCT.md holds what a human said. Run the look pass or amend it, never write it by hand.")
 		}
 	case "session":
 		var out strings.Builder

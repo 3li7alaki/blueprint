@@ -21,6 +21,7 @@ Every command supports `--json`. Human output is never the integration protocol.
 | `blueprint open list [--blocking <feature\|feature/slug>] [--status OPEN\|DEFERRED]` | matching entries |
 | `blueprint trace <feature>/<slug>` | files carrying the tag, split into code and test |
 | `blueprint ask <pass> [--depth quick\|standard\|paranoid] [--batch 5]` | next unanswered questions from the bank |
+| `blueprint look show [--section <name>]` | one section of `PRODUCT.md`, or the section names |
 | `blueprint check [--gate <name>]` | gate results, exit 1 on any failure |
 | `blueprint mint <feature>/<slug>` | the `mint spec new` command line for that requirement, on stdout, unexecuted |
 | `blueprint map [--path <p>]` | coverage per directory: files, mapped, unmapped, derived, open |
@@ -118,6 +119,7 @@ reformat untouched lines, and refuse to produce an em dash or en dash.
 
 | command | does |
 |---|---|
+| `blueprint look new` | writes root `PRODUCT.md` from the template. Refuses to replace one |
 | `blueprint spec new <feature>` | writes `blueprint/spec/<feature>.md` from the template |
 | `blueprint req add <feature>/<slug> --ears <s> --fit <s> --confidence stated\|derived [--evidence <s>]` | appends a requirement |
 | `blueprint req confirm <feature>/<slug>` | flips `derived` to `stated`. The only way. |
@@ -136,7 +138,7 @@ it if absent and leaving unrelated keys untouched:
 | event | command | effect |
 |---|---|---|
 | `SessionStart` | `blueprint hook session` | injects open blockers, failing gates, next requirement |
-| `PreToolUse` on `Edit\|Write\|MultiEdit` | `blueprint hook pre-write` | refuses hand edits to `blueprint/spec/` and `blueprint/decisions/` |
+| `PreToolUse` on `Edit\|Write\|MultiEdit` | `blueprint hook pre-write` | refuses hand edits to `blueprint/spec/`, `blueprint/decisions/`, and `PRODUCT.md` once it exists |
 | `Stop` | `blueprint hook done` | refuses to end a turn while a gate is red |
 
 The hooks are subcommands, not scripts written into the repo. A copied script goes stale the
@@ -162,6 +164,8 @@ their own atomic replacements.
 | `unmapped` | a non-test file inside a harvested scope carries no `@spec` tag |
 | `bug` | a requirement carries a `bug:` marker, meaning the code is known to violate it |
 | `drift` | a requirement was reworded after the last change to the code carrying its tag |
+| `look` | a spec declares a surface and `PRODUCT.md` is missing or a required section is empty |
+| `tokens` | a component file carries a raw colour or font stack instead of using the token home |
 
 `drift` compares requirement text across commits, never file timestamps. Three consequences, and
 each one is a reason a timestamp cannot do this job:
@@ -175,6 +179,25 @@ each one is a reason a timestamp cannot do this job:
 
 Uncommitted work is dated by mtime, having no commit yet. Where git cannot answer at all the gate
 reports nothing: no history means no information, which is not the same as no change.
+
+`look` requires `register`, `platform`, `users`, `positioning` and `accessibility & inclusion`.
+The rest of `PRODUCT.md` is worth having and none of it is worth a red gate; a check that fires on
+a missing adjective teaches people to ignore checks. It stays silent until a spec declares a
+surface, so a CLI or a worker never sees it.
+
+`tokens` is opt-in through a machine-read section of `blueprint/CONVENTIONS.md`, the same shape as
+`## Harvested` in `PROJECT.md`:
+
+```md
+## Tokens
+home: src/styles/tokens.css
+components: src/**/*.tsx, src/**/*.css
+```
+
+It matches raw hex colours and font stacks only. Spacing is deliberately excluded: a 1px border is
+legitimate in any component, so a px rule would cry wolf until somebody switched the gate off. A
+line carrying `blueprint:allow-raw` is skipped, because an SVG fill or a third party embed is a
+real exception, and a gate with no exit is a gate people delete.
 
 Exit code is 0 or 1. `--json` emits `{gate, status, offenders[]}` per gate.
 
@@ -273,6 +296,38 @@ date: 2026-07-25
 ```
 
 Immutable once written. A change is a new file plus `blueprint supersede`.
+
+### `PRODUCT.md`
+
+Root, or `.agents/context/` or `docs/`, which is where every design tool already looks. One
+`## ` heading per section, free text under each, and an empty section reads as unanswered rather
+than as answered blank:
+
+```md
+## Register
+product
+## Platform
+web
+## Users
+## Product Purpose
+## Positioning
+## Brand Personality
+## Anti-references
+## Design Principles
+## Accessibility & Inclusion
+## Conversion & proof
+```
+
+`Register` is `brand` or `product`, `Platform` is `web`, `ios`, `android` or `adaptive`, both as
+bare words. `Conversion & proof` belongs to the brand register and is deleted outright for a
+product.
+
+Created by `look new` and filled in by the look pass, which keeps priced `OPEN.md` entries for
+what nobody decided and a decision record per visual choice. Once the file exists it is guarded,
+so later changes go through an amend rather than a helpful edit.
+
+`DESIGN.md` beside it is not blueprint's. It records what the interface actually is, generated
+from the code by whatever builds the screens, and no gate reads it.
 
 ### `blueprint/PROJECT.md`
 

@@ -20,6 +20,8 @@ either.
 ```text
 AGENTS.md                    # 15-line blueprint block, pointers only
 CLAUDE.md                    # @AGENTS.md, nothing else
+PRODUCT.md                   # register, platform, users, personality, principles  (<= 60 lines)
+DESIGN.md                    # what the interface is today. Not ours: see Look below
 blueprint/
   PROJECT.md                 # problem, users, non-goals, success metric   (<= 60 lines)
   OPEN.md                    # unresolved questions, priced, blocking      (grows)
@@ -71,7 +73,7 @@ fit: request with a 16-minute-old link returns 410 and no session is created.
 9. Never write an em dash or an en dash, in this repo or in anything blueprint generates.
    Use a comma, a colon, parentheses, or a full stop. `blueprint check` fails on one.
 
-## The seven passes
+## The passes
 
 Ordered; each feeds the next. Question bank lives in `questions/`, one file per pass, loaded
 on demand.
@@ -85,8 +87,33 @@ on demand.
 | rules | EARS requirements + slugs | every verb has a trigger and a response |
 | edges | adversarial sweep per rule | concurrent, empty, huge, hostile, deleted-parent covered |
 | gates | fit criteria | every requirement is mechanically checkable |
+| look | PRODUCT.md, plus a decision per visual choice | the look gate passes |
 
-Depth dial `quick | standard | paranoid` filters the bank. It never skips a pass.
+Depth dial `quick | standard | paranoid` filters the bank. It never skips a pass. `look` is the
+one pass that is skipped whole, and only where no spec declares a surface: a CLI has no register.
+
+## Look
+
+The seven settle what the product does. `look` settles what it is like to meet.
+
+A shrug becomes an `OPEN.md` entry with a price and a `blocks` glob, and every visual choice
+becomes a decision record carrying its reason. An interview ends when the talking stops. Only a
+price makes silence expensive.
+
+Two files, split exactly as `stated` and `derived` are:
+
+- `PRODUCT.md` is what a human said. Register, platform, users, positioning, personality,
+  anti-references, principles, accessibility. Root, because every design tool reads it. Whoever
+  runs the interview may create it; once it exists `hook pre-write` guards it, so it changes
+  through an amend and not through a helpful edit.
+- `DESIGN.md` is what the interface turned out to be, generated from the code by whatever builds
+  the screens. blueprint never writes it and no gate reads it. Checking code against a document
+  derived from that same code is a circle.
+
+Visual choices are decision records, never prose in a spec. A colour strategy is a choice with a
+reason, and the reason is the only thing that stops the next agent silently re-deciding it. What
+is mechanically checkable is the token home: `blueprint/CONVENTIONS.md` names it, and the `tokens`
+gate then keeps colour and type out of components.
 
 ## Brownfield
 

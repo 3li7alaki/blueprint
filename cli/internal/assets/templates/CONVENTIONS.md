@@ -17,6 +17,15 @@
 | test | `<path/to/exemplar>` | |
 | background job | `<path/to/exemplar>` | |
 
+## Tokens
+
+<!-- Delete this section in a project with no interface. Filling it in switches the `tokens`
+     gate on: colours and font stacks then live in `home` only, and a component carrying a raw
+     hex fails. A single line may opt out with a `blueprint:allow-raw` comment.
+
+     home: src/styles/tokens.css
+     components: src/**/*.tsx, src/**/*.css -->
+
 ## Naming
 
 <!-- Only rules that are decidable by looking. "Use clear names" is not a convention. -->

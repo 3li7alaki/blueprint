@@ -82,6 +82,14 @@ func MatchGlob(pattern, name string) bool {
 		switch pattern[i] {
 		case '*':
 			if i+1 < len(pattern) && pattern[i+1] == '*' {
+				// `src/**/*.tsx` has to match `src/button.tsx`. Everyone who writes that pattern
+				// means "at any depth, including none", and a literal `.*` silently demands a
+				// directory in between, so the glob quietly covers less than its author asked for.
+				if i+2 < len(pattern) && pattern[i+2] == '/' {
+					b.WriteString("(?:.*/)?")
+					i += 2
+					continue
+				}
 				b.WriteString(".*")
 				i++
 			} else {

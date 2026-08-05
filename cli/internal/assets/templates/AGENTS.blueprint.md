@@ -7,6 +7,9 @@ Before code:
 2. Check `blueprint/OPEN.md`. An entry blocking this feature → stop and report. Never invent
    the answer.
 3. Follow `blueprint/CONVENTIONS.md` and copy the exemplar file it names.
+4. Building an interface: read `PRODUCT.md` for register, platform and principles, plus the
+   decision records for colour, type and motion. No `PRODUCT.md` → stop, run `/blueprint-look`.
+   Colours and font stacks live in the token home, never in a component.
 
 While coding:
 - Tag implementing symbols `@spec <feature>/<requirement-slug>`. Tag the covering test too.
