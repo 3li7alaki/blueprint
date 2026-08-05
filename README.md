@@ -73,7 +73,7 @@ numbers. `auth-magic-link/link-expires-in-15-min` survives inserts, deletes and 
 | orphan | a `@spec` tag points at a requirement that doesn't exist |
 | budget | a doc grew past its line limit |
 | blocked | work started on something `OPEN.md` blocks |
-| drift | code moved but the spec didn't |
+| drift | a rule was reworded and its code stayed put |
 
 Your traceability matrix is `rg '@spec' | sort`. No database, no tool, no ceremony.
 

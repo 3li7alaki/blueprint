@@ -105,23 +105,7 @@ func Run(root, only string) []Result {
 				}
 			}
 		case "drift":
-			for _, spec := range specs {
-				info, err := os.Stat(spec.Path)
-				if err != nil {
-					continue
-				}
-				for _, req := range spec.Requirements {
-					var newest int64
-					for _, tag := range tags {
-						if tag.Qualified == req.Qualified() && tag.ModTime > newest {
-							newest = tag.ModTime
-						}
-					}
-					if newest > 0 && info.ModTime().UnixNano() > newest {
-						offenders = append(offenders, req.Qualified())
-					}
-				}
-			}
+			offenders = drift(root, specs, tags)
 		}
 		sort.Strings(offenders)
 		status := "pass"
@@ -131,6 +115,71 @@ func Run(root, only string) []Result {
 		results = append(results, Result{Gate: name, Status: status, Offenders: offenders})
 	}
 	return results
+}
+
+// drift names every requirement whose wording was amended after the last change to the code
+// carrying its tag. Three things it deliberately stays quiet about:
+//
+// @spec traceability/drift-follows-the-amendment
+//
+// A requirement that was only ever introduced is not drift. Writing a rule for code that already
+// satisfies it is the whole brownfield flow, and a gate that reddened on it would make harvest
+// unusable. A sibling requirement added to the same file is not drift either, which is why this
+// compares requirement text and never file timestamps. A requirement with no tag at all is
+// uncovered, and the coverage gate owns that.
+//
+// @spec traceability/drift-survives-checkout
+//
+// Times come from commits, so a clone, a checkout and a task worktree all answer the same.
+func drift(root string, specs []model.Spec, tags []scan.Tag) []string {
+	var paths []string
+	for _, tag := range tags {
+		paths = append(paths, tag.Path)
+	}
+	times := repo.Times(root, paths)
+	var offenders []string
+	for _, spec := range specs {
+		rel, err := filepath.Rel(root, spec.Path)
+		if err != nil {
+			continue
+		}
+		amended := amendments(root, filepath.ToSlash(rel))
+		for _, req := range spec.Requirements {
+			at := amended[req.Slug]
+			if at == 0 {
+				continue
+			}
+			var newest int64
+			for _, tag := range tags {
+				if tag.Qualified == req.Qualified() && times[tag.Path] > newest {
+					newest = times[tag.Path]
+				}
+			}
+			if newest > 0 && at > newest {
+				offenders = append(offenders, req.Qualified())
+			}
+		}
+	}
+	return offenders
+}
+
+// amendments dates the last rewording of each requirement in a spec. A requirement that has never
+// changed since the revision that introduced it maps to zero, meaning no amendment, not no answer.
+func amendments(root, rel string) map[string]int64 {
+	amended := map[string]int64{}
+	previous := map[string]string{}
+	for i, rev := range repo.History(root, rel) {
+		blocks := parser.RequirementBlocks(rev.Content)
+		for slug, text := range blocks {
+			if was, existed := previous[slug]; i > 0 && existed && was != text {
+				amended[slug] = rev.Time
+			} else if _, seen := amended[slug]; !seen {
+				amended[slug] = 0
+			}
+		}
+		previous = blocks
+	}
+	return amended
 }
 
 func unmapped(root string, tags []scan.Tag) []string {

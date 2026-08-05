@@ -57,6 +57,18 @@ fit: a spec with one requirement and no test makes check --gate coverage exit 1 
 WHEN a file is new and not yet committed, THE gates SHALL still scan it.
 fit: an untracked file carrying an unknown @spec tag makes the orphan gate fail
 
+
+### drift-survives-checkout
+`stated`
+WHEN a tree is freshly checked out, THE drift gate SHALL compare the commit that last touched each file and never the file mtime.
+fit: a repo whose spec is committed before its code reports no drift after a checkout rewrites every mtime
+
+
+### drift-follows-the-amendment
+`stated`
+WHEN a requirement is reworded after the code carrying its tag last changed, THE drift gate SHALL name that requirement and no other.
+fit: adding a second requirement to a spec leaves the first one passing, and rewording the first one fails it
+
 ## Edges
 
 <!-- Adversarial sweep. Every edge that changes behaviour becomes a requirement above with its

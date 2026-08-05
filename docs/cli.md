@@ -161,8 +161,20 @@ their own atomic replacements.
 | `dash` | any tracked file contains an em dash or en dash |
 | `unmapped` | a non-test file inside a harvested scope carries no `@spec` tag |
 | `bug` | a requirement carries a `bug:` marker, meaning the code is known to violate it |
+| `drift` | a requirement was reworded after the last change to the code carrying its tag |
 
-| `drift` | a spec file is newer than the newest file carrying one of its `@spec` tags |
+`drift` compares requirement text across commits, never file timestamps. Three consequences, and
+each one is a reason a timestamp cannot do this job:
+
+- Adding a requirement dates the spec file but not the requirements already in it, so a new
+  sibling never drags its neighbours red.
+- A requirement written for code that already satisfies it is an introduction, not an amendment,
+  so harvesting a brownfield repo does not light the gate up on day one.
+- A clone, a checkout, and a task worktree rewrite every mtime in whatever order they walk the
+  tree. Commit times survive all three, so the gate answers the same in every copy.
+
+Uncommitted work is dated by mtime, having no commit yet. Where git cannot answer at all the gate
+reports nothing: no history means no information, which is not the same as no change.
 
 Exit code is 0 or 1. `--json` emits `{gate, status, offenders[]}` per gate.
 

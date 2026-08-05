@@ -36,7 +36,6 @@ type Tag struct {
 	Qualified string
 	Path      string
 	Test      bool
-	ModTime   int64
 }
 
 func Tags(root string) ([]Tag, error) {
@@ -53,13 +52,12 @@ func Tags(root string) ([]Tag, error) {
 		if err != nil {
 			continue
 		}
-		info, _ := os.Stat(filepath.Join(root, filepath.FromSlash(rel)))
 		for _, line := range strings.Split(string(data), "\n") {
 			if !inComment(line) {
 				continue
 			}
 			for _, match := range tagRE.FindAllStringSubmatch(line, -1) {
-				tags = append(tags, Tag{Qualified: match[1], Path: rel, Test: IsTest(rel), ModTime: info.ModTime().UnixNano()})
+				tags = append(tags, Tag{Qualified: match[1], Path: rel, Test: IsTest(rel)})
 			}
 		}
 	}
