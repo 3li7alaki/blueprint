@@ -14,6 +14,7 @@ import (
 
 	"blueprint/internal/assets"
 	"blueprint/internal/atomicfile"
+	"blueprint/internal/base"
 	"blueprint/internal/gates"
 	"blueprint/internal/model"
 	"blueprint/internal/parser"
@@ -93,10 +94,10 @@ func (a App) Run(args []string) (int, error) {
 		fmt.Fprint(a.Out, usage)
 		return 1, nil
 	}
-	if args[0] == "version" || args[0] == "--version" || args[0] == "-v" {
+	if base.Command(args) == "version" {
 		return 0, a.output(opts.json, map[string]string{"version": a.Version}, a.Version)
 	}
-	if args[0] == "help" || args[0] == "--help" || args[0] == "-h" {
+	if base.Command(args) == "help" {
 		fmt.Fprint(a.Out, usage)
 		return 0, nil
 	}
