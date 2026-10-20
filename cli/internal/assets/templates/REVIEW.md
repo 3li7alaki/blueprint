@@ -29,10 +29,15 @@ Run these in order. Stop at the first failure and report it. Do not accumulate a
 8. **Look.** Interface diffs only. Each surface it touches still answers all five states, no
    colour or font stack was written outside the token home, and nothing in it contradicts a
    `PRODUCT.md` principle or lands on a named anti-reference.
+9. **Load.** Read `PROJECT.md` and the deploy config for the expected load. A check-then-write
+   race, a query per item, state that only grows, or per-process state that must be shared,
+   wrong at that load, fails.
 
 ## Verdict
 
 One of: `pass`, `fail: <lens>: <one line>`. No praise, no style opinions, no "consider".
+A fail names the input or state that gives the wrong result; no case, no fail. A `ponytail:`
+comment that names its limit is a decision, unless the load crosses it.
 
 ## Independence
 
