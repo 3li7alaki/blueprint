@@ -27,6 +27,13 @@
 
 <!-- Budget, deadline, stack lock-in, compliance regime, team size, existing data. -->
 
+## Load
+
+<!-- What it runs under, in numbers: users or requests at peak, data volume and growth,
+     replicas, workers. REVIEW.md lens 9 judges races and N+1 queries against this line. -->
+
+- peak: N users, N req/s. data: N rows, +N/month. runs as: N replicas, N workers
+
 ## Depth
 
 `quick` | `standard` | `paranoid`
