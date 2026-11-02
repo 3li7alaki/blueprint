@@ -57,14 +57,14 @@ isolate one problem each.
 
 ### Value rules
 
-1. `missing-definition`: `definition` is absent or empty after trimming whitespace.
-2. `missing-status`: the required `status` key is absent.
-3. `bad-term-status`: a supplied status is neither `existing` nor `planned`, including an empty value.
-4. `bad-states`: a supplied states list contains an empty entry or an entry outside the slug grammar.
+5. `missing-definition`: `definition` is absent or empty after trimming whitespace.
+6. `missing-status`: the required `status` key is absent.
+7. `bad-term-status`: a supplied status is neither `existing` nor `planned`, including an empty value.
+8. `bad-states`: a supplied states list contains an empty entry or an entry outside the slug grammar.
 
 ### Identity rule
 
-1. `bad-id`: a supplied id or term path violates the identity rules. The problem uses line zero.
+9. `bad-id`: a supplied id or term path violates the identity rules. The problem uses line zero.
 
 ## Examples
 

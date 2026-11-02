@@ -60,7 +60,11 @@ Rules are stable identifiers. Missing keys use line zero. Other value problems
 name their header line. Duplicate keys name the later occurrence and retain the
 first value. Independent problems may be reported together. Encoding errors stop
 parsing, so a BOM with a valid id yields only its own problem. Invalid fixtures
-isolate one problem each.
+isolate one problem each. Callers treat any problem as fatal.
+
+A `resolution` key with a missing `status` reports both `missing-status` and
+`resolution-without-resolved`. The missing status uses line zero; the resolution
+problem names the resolution line.
 
 ### Header rules
 
@@ -71,25 +75,25 @@ isolate one problem each.
 
 ### Required key rules
 
-1. `missing-question`: `question` is absent or empty after trimming whitespace.
-2. `missing-cost`: `cost` is absent or empty after trimming whitespace.
-3. `missing-blocks`: the required `blocks` key is absent.
-4. `missing-status`: the required `status` key is absent.
-5. `missing-asked`: the required `asked` key is absent.
+5. `missing-question`: `question` is absent or empty after trimming whitespace.
+6. `missing-cost`: `cost` is absent or empty after trimming whitespace.
+7. `missing-blocks`: the required `blocks` key is absent.
+8. `missing-status`: the required `status` key is absent.
+9. `missing-asked`: the required `asked` key is absent.
 
 ### Value rules
 
-1. `bad-question`: a supplied nonempty question does not end with `?`.
-2. `bad-blocks`: a supplied blocks list contains an empty entry, invalid requirement id or invalid prefix wildcard.
-3. `bad-open-status`: a supplied status is not `open`, `deferred` or `resolved`, including an empty value.
-4. `bad-asked`: a supplied date cannot be parsed with layout `2006-01-02`, including an empty value or impossible calendar date.
-5. `empty-owner`: a supplied owner is empty after trimming whitespace.
+10. `bad-question`: a supplied nonempty question does not end with `?`.
+11. `bad-blocks`: a supplied blocks list contains an empty entry, invalid requirement id or invalid prefix wildcard.
+12. `bad-open-status`: a supplied status is not `open`, `deferred` or `resolved`, including an empty value.
+13. `bad-asked`: a supplied date cannot be parsed with layout `2006-01-02`, including an empty value or impossible calendar date.
+14. `empty-owner`: a supplied owner is empty after trimming whitespace.
 
 ### Resolution and identity rules
 
-1. `resolved-without-resolution`: status is `resolved` and resolution is absent or empty after trimming whitespace. The problem names the status line.
-2. `resolution-without-resolved`: a resolution key is present with any status other than `resolved`, even if its value is empty.
-3. `bad-id`: a supplied id or question path violates the identity rules. The problem uses line zero.
+15. `resolved-without-resolution`: status is `resolved` and resolution is absent or empty after trimming whitespace. The problem names the status line.
+16. `resolution-without-resolved`: a resolution key is present with any status other than `resolved`, even if its value is empty or the status key is missing.
+17. `bad-id`: a supplied id or question path violates the identity rules. The problem uses line zero.
 
 ## Examples
 

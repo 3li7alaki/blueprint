@@ -26,7 +26,7 @@ func TestFixtures(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if (category == "valid" && len(paths) < 4) || (category == "invalid" && len(paths) != 19) {
+		if (category == "valid" && len(paths) < 4) || (category == "invalid" && len(paths) != 20) {
 			t.Fatalf("%s fixture count = %d", category, len(paths))
 		}
 		for _, path := range paths {

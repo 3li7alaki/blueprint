@@ -11,19 +11,6 @@ import (
 const minimalTerm = "definition: An amount is a quantity of money.\nstatus: existing\n"
 const minimalOpen = "question: Which rounding rule applies?\ncost: Incorrect totals require ledger repairs.\nblocks: billing/rounds-half-even\nstatus: open\nasked: 2026-11-02\n"
 
-func TestRequirementBOMFixture(t *testing.T) {
-	// Keep the original requirement fixture inventory unchanged; test the new encoding rule separately.
-	path := filepath.Join("..", "..", "..", "formats", "fixtures", "invalid", "encoding", "requirement--byte-order-mark.md")
-	data, err := os.ReadFile(path)
-	if err != nil {
-		t.Fatal(err)
-	}
-	_, problems := Parse("fixture/byte-order-mark", data)
-	if len(problems) != 1 || problems[0].Rule != "byte-order-mark" || problems[0].Line != 0 {
-		t.Fatalf("problems = %v, want exactly byte-order-mark at zero", problems)
-	}
-}
-
 func TestTermOpenFixtures(t *testing.T) {
 	for _, kind := range []struct {
 		name           string
@@ -182,6 +169,16 @@ func TestTermOpenValidation(t *testing.T) {
 	for _, problems := range [][]Problem{termProblems, openProblems} {
 		if len(problems) != 1 || problems[0].Rule != "bad-id" || problems[0].Line != 0 {
 			t.Fatalf("bad id problems = %v", problems)
+		}
+	}
+}
+
+func TestResolutionWithoutStatus(t *testing.T) {
+	for _, value := range []string{"decisions/rounding", ""} {
+		data := strings.Replace(minimalOpen, "status: open\n", "", 1) + "resolution: " + value + "\n"
+		_, problems := ParseOpen("missing-status", []byte(data))
+		if len(problems) != 2 || problems[0].Rule != "missing-status" || problems[0].Line != 0 || problems[1].Rule != "resolution-without-resolved" || problems[1].Line != 5 {
+			t.Fatalf("resolution %q: problems = %v, want missing-status at zero and resolution-without-resolved at 5", value, problems)
 		}
 	}
 }

@@ -22,10 +22,10 @@ Invalid names are `<kind>--<rule-slug>.md`; each breaks exactly its named rule.
 Requirement fixtures use the id `fixture/<name>`, term fixtures use
 `fixture:<name>` and open question fixtures use `<name>`. Graph and path rules
 have tests rather than file fixtures. Object parsers validate syntax only;
-resolving term references, block targets and decision names is outside these
-formats. Fingerprints are outside version 1.
+resolving block targets and decision names is outside these formats.
 
-The requirement BOM fixture lives at
-`fixtures/invalid/encoding/requirement--byte-order-mark.md` and has a dedicated
-test. This extends encoding coverage while preserving the original requirement
-fixture inventory and its unchanged tests.
+[Fingerprint v1](fingerprint-v1.md) defines canonical bytes for terms and
+requirements, semantic dependency resolution and judged reference verification.
+Its [vectors](vectors/fingerprint.json) contain parsed inputs, canonical strings
+and expected digests. Run `sh formats/vectors/check.sh` from the repo root for
+an independent digest check using `jq` and `shasum -a 256`.
