@@ -15,6 +15,8 @@ The cleaned path must remain under the supplied spec root and end with `.md`.
 
 Files use UTF-8. Normalize CRLF to LF before parsing. Invalid UTF-8 produces
 `malformed-line` with line zero. All other header line numbers start at one.
+A leading UTF-8 byte order mark produces only `byte-order-mark` at line zero
+for an otherwise valid id. Parsing stops before header or value validation.
 
 The header contains one `key: value` per line, with lowercase keys and exactly
 one space after the colon. Keys may appear in any order. No indentation,
@@ -81,6 +83,7 @@ isolate one problem each.
 21. `unknown-dependency`: a dependency targets an id absent from the supplied requirement set.
 22. `self-dependency`: a dependency targets its own requirement id.
 23. `bad-id`: a supplied id or requirement path violates the identity rules.
+24. `byte-order-mark`: the file starts with UTF-8 BOM bytes `EF BB BF`.
 
 Graph problems use line zero. Both edge kinds participate equally in validation.
 Repeated edges, including the same edge in both lists, count once. Self edges
@@ -124,5 +127,7 @@ The reference pins the intended explanation for a human judgment.
 
 ## Changelog
 
-Version 1 defines the initial keys, validation rules and object identity. No minor
-changes have been added.
+Version 1 defines the initial keys, validation rules and object identity.
+
+Minor change: leading UTF-8 BOM rejection now has its own `byte-order-mark`
+diagnostic at line zero instead of cascading header and missing-field problems.

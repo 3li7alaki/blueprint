@@ -1,4 +1,4 @@
-// Package reqfile parses and validates version 1 requirement files.
+// Package reqfile parses and validates version 1 requirement, term and open question files.
 package reqfile
 
 import (
@@ -7,7 +7,6 @@ import (
 	"regexp"
 	"slices"
 	"strings"
-	"unicode/utf8"
 )
 
 type Problem struct {
@@ -47,16 +46,8 @@ func IDFromPath(specRoot, path string) (string, error) {
 func Parse(id string, data []byte) (Requirement, []Problem) {
 	r := Requirement{ID: id}
 	var problems []Problem
-	lines := map[string]int{}
-	bad := func(rule, key, msg string) {
-		problems = append(problems, Problem{Rule: rule, Line: lines[key], Msg: msg})
-	}
 	if !idPattern.MatchString(id) {
-		bad("bad-id", "", "expected at least two slug segments")
-	}
-	if !utf8.Valid(data) {
-		bad("malformed-line", "", "expected UTF-8")
-		return r, problems
+		problems = append(problems, Problem{Rule: "bad-id", Msg: "expected at least two slug segments"})
 	}
 	var fit, reference, scope, needs, after string
 	fields := map[string]*string{
@@ -64,27 +55,12 @@ func Parse(id string, data []byte) (Requirement, []Problem) {
 		"confidence": &r.Confidence, "evidence": &r.Evidence, "scope": &scope,
 		"needs": &needs, "after": &after, "tier": &r.Tier, "superseded-by": &r.SupersededBy,
 	}
-	text := strings.Split(strings.ReplaceAll(string(data), "\r\n", "\n"), "\n")
-	for i, line := range text {
-		if line == "" {
-			r.Body = strings.Join(text[i+1:], "\n")
-			break
-		}
-		key, value, ok := strings.Cut(line, ": ")
-		if !ok || !keyPattern.MatchString(key) || strings.HasPrefix(value, " ") || strings.HasPrefix(value, "\t") || strings.ContainsRune(line, '\r') {
-			problems = append(problems, Problem{"malformed-line", i + 1, "expected key: value with one separator space"})
-			continue
-		}
-		field, known := fields[key]
-		if !known {
-			problems = append(problems, Problem{"unknown-key", i + 1, "unknown key " + key})
-			continue
-		}
-		if lines[key] != 0 {
-			problems = append(problems, Problem{"duplicate-key", i + 1, "duplicate key " + key})
-			continue
-		}
-		*field, lines[key] = value, i+1
+	lines := parseHeader(data, fields, &r.Body, &problems)
+	if lines == nil {
+		return r, problems
+	}
+	bad := func(rule, key, msg string) {
+		problems = append(problems, Problem{Rule: rule, Line: lines[key], Msg: msg})
 	}
 	for _, key := range []string{"ears", "fit", "confidence", "scope"} {
 		if lines[key] == 0 {
