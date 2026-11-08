@@ -1,4 +1,4 @@
-# Open question format v1
+# Open question format v0
 
 ## Layout and identity
 
@@ -42,7 +42,7 @@ body content. There is no header continuation syntax.
 
 Values are preserved except block entries, which lose surrounding whitespace.
 Blocks retain their order and duplicates. A requirement id contains at least two
-slash-separated slug segments, as defined in [requirement-v1.md](requirement-v1.md).
+slash-separated slug segments, as defined in [requirement-v0.md](requirement-v0.md).
 A prefix contains one or more slash-separated slug segments followed by `/*`.
 For example, `billing/*` and `billing/checkout/*` select every requirement under
 their respective prefixes. No other wildcard syntax is valid.
@@ -125,4 +125,6 @@ The decision records the approved rounding policy and its rationale.
 
 ## Changelog
 
-Version 1 defines the initial keys, validation rules and object identity.
+### 0.1
+
+Initial draft defining the keys, validation rules and object identity.

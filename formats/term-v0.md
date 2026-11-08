@@ -1,4 +1,4 @@
-# Glossary term format v1
+# Glossary term format v0
 
 ## Layout and identity
 
@@ -89,4 +89,6 @@ Reviewers need its rationale before deciding whether to accept it.
 
 ## Changelog
 
-Version 1 defines the initial keys, validation rules and object identity.
+### 0.1
+
+Initial draft defining the keys, validation rules and object identity.

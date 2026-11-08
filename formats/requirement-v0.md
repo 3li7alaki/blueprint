@@ -1,4 +1,4 @@
-# Requirement format v1
+# Requirement format v0
 
 ## Layout and identity
 
@@ -127,7 +127,9 @@ The reference pins the intended explanation for a human judgment.
 
 ## Changelog
 
-Version 1 defines the initial keys, validation rules and object identity.
+### 0.1
+
+Initial draft defining the keys, validation rules and object identity.
 
 Minor change: leading UTF-8 BOM rejection now has its own `byte-order-mark`
 diagnostic at line zero instead of cascading header and missing-field problems.

@@ -5,8 +5,8 @@
       "id": "billing:invoice",
       "source": "definition: An invoice records café purchases.\nstatus: planned\nstates: draft, issued, paid\n"
     },
-    "canonical": "blueprint-term-fingerprint-v1\ndefinition\nAn invoice records café purchases.\nstates\ndraft,issued,paid\n",
-    "fingerprint": "sha256:f425180df2fa4cc53043c0fb548acf239ce7d368a1e6049194231a2148fa5adc"
+    "canonical": "blueprint-term-fingerprint-v0\ndefinition\nAn invoice records café purchases.\nstates\ndraft,issued,paid\n",
+    "fingerprint": "sha256:194e61006bd6d134d73f04c83e90f20e63e3bdae88e82eb1555fe2ff15a3424f"
   },
   {
     "name": "term-without-states",
@@ -14,8 +14,8 @@
       "id": "money:amount",
       "source": "definition: An amount is a quantity of money.\nstatus: existing\n"
     },
-    "canonical": "blueprint-term-fingerprint-v1\ndefinition\nAn amount is a quantity of money.\nstates\n\n",
-    "fingerprint": "sha256:1a04a0b54338d456b69b5aaa845618795b6ec3b3a861b65cf7e1fa23f6d98040"
+    "canonical": "blueprint-term-fingerprint-v0\ndefinition\nAn amount is a quantity of money.\nstates\n\n",
+    "fingerprint": "sha256:b567018a43152ccf7bc5cb6186457cb3de4a678f47912a0fe597b953ceac7628"
   },
   {
     "name": "requirement-unlinked",
@@ -27,8 +27,8 @@
     ],
     "terms": [],
     "target": "example/leaf",
-    "canonical": "blueprint-requirement-fingerprint-v1\ncontract\n1\nears\nWHEN called, THE system SHALL answer.\nfit\ntest: The response is successful.\nreference\n\n",
-    "fingerprint": "sha256:2e0c21674e73536a8782faa850e601452e7ff0c0bf4b849c1675437271f4fe9d"
+    "canonical": "blueprint-requirement-fingerprint-v0\ncontract\n0\nears\nWHEN called, THE system SHALL answer.\nfit\ntest: The response is successful.\nreference\n\n",
+    "fingerprint": "sha256:72da8b1425aa5d87ff0e47460b77e8ee715a14024e676e0e7dd4e79e9afb62b4"
   },
   {
     "name": "requirement-two-terms-reverse",
@@ -49,8 +49,8 @@
       }
     ],
     "target": "billing/updates-invoice",
-    "canonical": "blueprint-requirement-fingerprint-v1\ncontract\n1\nears\nWHEN [[money:amount]] changes, THE system SHALL update [[billing:invoice]].\nfit\ntest: Every [[billing:invoice]] preserves [[money:amount]].\nreference\n\nterm billing:invoice sha256:f425180df2fa4cc53043c0fb548acf239ce7d368a1e6049194231a2148fa5adc\nterm money:amount sha256:1a04a0b54338d456b69b5aaa845618795b6ec3b3a861b65cf7e1fa23f6d98040\n",
-    "fingerprint": "sha256:f4084616317f1472c74eeb0d63a5d3db6adfb4923721081dff241a233d45f20a"
+    "canonical": "blueprint-requirement-fingerprint-v0\ncontract\n0\nears\nWHEN [[money:amount]] changes, THE system SHALL update [[billing:invoice]].\nfit\ntest: Every [[billing:invoice]] preserves [[money:amount]].\nreference\n\nterm billing:invoice sha256:194e61006bd6d134d73f04c83e90f20e63e3bdae88e82eb1555fe2ff15a3424f\nterm money:amount sha256:b567018a43152ccf7bc5cb6186457cb3de4a678f47912a0fe597b953ceac7628\n",
+    "fingerprint": "sha256:60e13ad76ed1e568cbbb9b9caf39436f4911ae2124fb414dbd1c3ade462e5995"
   },
   {
     "name": "requirement-needs-middle",
@@ -66,8 +66,8 @@
     ],
     "terms": [],
     "target": "example/middle",
-    "canonical": "blueprint-requirement-fingerprint-v1\ncontract\n1\nears\nWHEN called, THE system SHALL relay the answer.\nfit\ntest: The response is successful.\nreference\n\nneeds example/leaf sha256:2e0c21674e73536a8782faa850e601452e7ff0c0bf4b849c1675437271f4fe9d\n",
-    "fingerprint": "sha256:46c1a495c925dcbb08d8f8a41884bb9db538747e67be5938d43141217ae859a3"
+    "canonical": "blueprint-requirement-fingerprint-v0\ncontract\n0\nears\nWHEN called, THE system SHALL relay the answer.\nfit\ntest: The response is successful.\nreference\n\nneeds example/leaf sha256:72da8b1425aa5d87ff0e47460b77e8ee715a14024e676e0e7dd4e79e9afb62b4\n",
+    "fingerprint": "sha256:7e920e6012f1193fed4dbbd7a8000f73c81ad4379f5c31d75acdb9ad76d0659d"
   },
   {
     "name": "requirement-needs-chain-depth-two",
@@ -87,8 +87,8 @@
     ],
     "terms": [],
     "target": "example/root",
-    "canonical": "blueprint-requirement-fingerprint-v1\ncontract\n1\nears\nWHEN called, THE system SHALL report the relayed answer.\nfit\ntest: The response is successful.\nreference\n\nneeds example/middle sha256:46c1a495c925dcbb08d8f8a41884bb9db538747e67be5938d43141217ae859a3\n",
-    "fingerprint": "sha256:909e75b1eb3a808639a3791bbe5968a93e15938463ee687e3d1c496431a8971f"
+    "canonical": "blueprint-requirement-fingerprint-v0\ncontract\n0\nears\nWHEN called, THE system SHALL report the relayed answer.\nfit\ntest: The response is successful.\nreference\n\nneeds example/middle sha256:7e920e6012f1193fed4dbbd7a8000f73c81ad4379f5c31d75acdb9ad76d0659d\n",
+    "fingerprint": "sha256:26b86a42e2bbc76c80a8748455fb8a27d7a5290e2334e2ee0657a15da8e28641"
   },
   {
     "name": "requirement-double-spaces",
@@ -101,8 +101,8 @@
     "terms": [],
     "target": "example/double-space",
     "different_from": "requirement-unlinked",
-    "canonical": "blueprint-requirement-fingerprint-v1\ncontract\n1\nears\nWHEN called, THE system SHALL  answer.\nfit\ntest: The response is successful.\nreference\n\n",
-    "fingerprint": "sha256:0c62ada642936aef5c7905abe2a48a843596df4f454f4b6500935fb3b40e2dfc"
+    "canonical": "blueprint-requirement-fingerprint-v0\ncontract\n0\nears\nWHEN called, THE system SHALL  answer.\nfit\ntest: The response is successful.\nreference\n\n",
+    "fingerprint": "sha256:17f69c4399bfebbc24ee000ba1b9fa7b1e4302020e07d162bb7f136e97065257"
   },
   {
     "name": "requirement-after-scope-changed",
@@ -115,8 +115,8 @@
     "terms": [],
     "target": "example/scheduling-change",
     "same_as": "requirement-unlinked",
-    "canonical": "blueprint-requirement-fingerprint-v1\ncontract\n1\nears\nWHEN called, THE system SHALL answer.\nfit\ntest: The response is successful.\nreference\n\n",
-    "fingerprint": "sha256:2e0c21674e73536a8782faa850e601452e7ff0c0bf4b849c1675437271f4fe9d"
+    "canonical": "blueprint-requirement-fingerprint-v0\ncontract\n0\nears\nWHEN called, THE system SHALL answer.\nfit\ntest: The response is successful.\nreference\n\n",
+    "fingerprint": "sha256:72da8b1425aa5d87ff0e47460b77e8ee715a14024e676e0e7dd4e79e9afb62b4"
   },
   {
     "name": "requirement-judged",
@@ -128,8 +128,8 @@
     ],
     "terms": [],
     "target": "example/judged",
-    "canonical": "blueprint-requirement-fingerprint-v1\ncontract\n1\nears\nWHEN called, THE system SHALL answer.\nfit\njudged: The response matches the reference.\nreference\n7deb81f184a9205b7066f33afd8c32df389261e2f7ebd799c7240a8636874118\n",
-    "fingerprint": "sha256:5b7ec4b47562764b0abed7bc450d4c7fb16656b718d4e59ce16930ef09542ffc"
+    "canonical": "blueprint-requirement-fingerprint-v0\ncontract\n0\nears\nWHEN called, THE system SHALL answer.\nfit\njudged: The response matches the reference.\nreference\n7deb81f184a9205b7066f33afd8c32df389261e2f7ebd799c7240a8636874118\n",
+    "fingerprint": "sha256:5f05845700f979f24fe5b2d5ce0b7a5cfbc5b9415df69982c573bdd1e7e34f51"
   },
   {
     "name": "requirement-sorted-distinct-needs",
@@ -149,8 +149,8 @@
     ],
     "terms": [],
     "target": "example/diamond",
-    "canonical": "blueprint-requirement-fingerprint-v1\ncontract\n1\nears\nWHEN called, THE system SHALL answer.\nfit\ntest: The response is successful.\nreference\n\nneeds example/leaf sha256:2e0c21674e73536a8782faa850e601452e7ff0c0bf4b849c1675437271f4fe9d\nneeds example/middle sha256:46c1a495c925dcbb08d8f8a41884bb9db538747e67be5938d43141217ae859a3\n",
-    "fingerprint": "sha256:84915aa48df7266c113d3077b44915d7c640f29a339fc07e13a0fc9686018968"
+    "canonical": "blueprint-requirement-fingerprint-v0\ncontract\n0\nears\nWHEN called, THE system SHALL answer.\nfit\ntest: The response is successful.\nreference\n\nneeds example/leaf sha256:72da8b1425aa5d87ff0e47460b77e8ee715a14024e676e0e7dd4e79e9afb62b4\nneeds example/middle sha256:7e920e6012f1193fed4dbbd7a8000f73c81ad4379f5c31d75acdb9ad76d0659d\n",
+    "fingerprint": "sha256:e88f6b572863366be1950a571904dad95f297ff79d01588ea8a7c3d9d261dd5b"
   },
   {
     "name": "term-status-body-changed",
@@ -159,8 +159,8 @@
       "source": "definition: An invoice records café purchases.\nstatus: existing\nstates: draft, issued, paid\n\nA different body.\n"
     },
     "same_as": "term-with-states",
-    "canonical": "blueprint-term-fingerprint-v1\ndefinition\nAn invoice records café purchases.\nstates\ndraft,issued,paid\n",
-    "fingerprint": "sha256:f425180df2fa4cc53043c0fb548acf239ce7d368a1e6049194231a2148fa5adc"
+    "canonical": "blueprint-term-fingerprint-v0\ndefinition\nAn invoice records café purchases.\nstates\ndraft,issued,paid\n",
+    "fingerprint": "sha256:194e61006bd6d134d73f04c83e90f20e63e3bdae88e82eb1555fe2ff15a3424f"
   },
   {
     "name": "requirement-crlf",
@@ -173,7 +173,7 @@
     "terms": [],
     "target": "example/leaf",
     "same_as": "requirement-unlinked",
-    "canonical": "blueprint-requirement-fingerprint-v1\ncontract\n1\nears\nWHEN called, THE system SHALL answer.\nfit\ntest: The response is successful.\nreference\n\n",
-    "fingerprint": "sha256:2e0c21674e73536a8782faa850e601452e7ff0c0bf4b849c1675437271f4fe9d"
+    "canonical": "blueprint-requirement-fingerprint-v0\ncontract\n0\nears\nWHEN called, THE system SHALL answer.\nfit\ntest: The response is successful.\nreference\n\n",
+    "fingerprint": "sha256:72da8b1425aa5d87ff0e47460b77e8ee715a14024e676e0e7dd4e79e9afb62b4"
   }
 ]

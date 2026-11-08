@@ -1,4 +1,4 @@
-// Package reqfile parses and validates version 1 requirement, term and open question files.
+// Package reqfile parses and validates version 0 requirement, term and open question files.
 package reqfile
 
 import (

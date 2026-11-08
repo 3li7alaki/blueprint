@@ -13,7 +13,7 @@ import (
 func TermFingerprint(t Term) string { return fingerprint(termCanonical(t)) }
 
 func termCanonical(t Term) string {
-	return "blueprint-term-fingerprint-v1\ndefinition\n" + t.Definition + "\nstates\n" + strings.Join(t.States, ",") + "\n"
+	return "blueprint-term-fingerprint-v0\ndefinition\n" + t.Definition + "\nstates\n" + strings.Join(t.States, ",") + "\n"
 }
 
 func fingerprint(canonical string) string {
@@ -28,7 +28,7 @@ func sortedDistinct(ids []string) []string {
 
 func requirementCanonical(r Requirement, terms, needs map[string]string) string {
 	var b strings.Builder
-	fmt.Fprintf(&b, "blueprint-requirement-fingerprint-v1\ncontract\n1\nears\n%s\nfit\n%s: %s\nreference\n%s\n", r.EARS, r.FitKind, r.Fit, r.ReferenceDigest)
+	fmt.Fprintf(&b, "blueprint-requirement-fingerprint-v0\ncontract\n0\nears\n%s\nfit\n%s: %s\nreference\n%s\n", r.EARS, r.FitKind, r.Fit, r.ReferenceDigest)
 	for _, id := range sortedDistinct(r.Terms) {
 		fmt.Fprintf(&b, "term %s %s\n", id, terms[id])
 	}

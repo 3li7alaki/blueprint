@@ -1,12 +1,12 @@
-# Fingerprint format v1
+# Fingerprint format v0
 
 A fingerprint identifies a term's definition and states, or a requirement's
 meaning including its glossary terms and semantic dependencies. SHA-256 hashes
 the canonical UTF-8 bytes. The result is `sha256:` followed by 64 lowercase
 hexadecimal characters.
 
-Inputs are successfully parsed [terms](term-v1.md) and
-[requirements](requirement-v1.md), with unique requirement ids. Use the exact
+Inputs are successfully parsed [terms](term-v0.md) and
+[requirements](requirement-v0.md), with unique requirement ids. Use the exact
 parsed bytes: CRLF has already become LF, and list entries have already lost
 surrounding whitespace. Apply no Unicode normalization or whitespace collapsing.
 For example, `a  b` and `a b` produce different fingerprints.
@@ -18,7 +18,7 @@ literal characters. Replace angle-bracket placeholders with their values.
 Every line, including the last, ends with exactly one LF byte.
 
 ```text
-blueprint-term-fingerprint-v1\n
+blueprint-term-fingerprint-v0\n
 definition\n
 <definition>\n
 states\n
@@ -30,12 +30,12 @@ excluded. Moving a term from `planned` to `existing` does not change its meaning
 
 ## Requirement canonical bytes
 
-The same notation applies. `contract` is followed by the literal version `1`.
+The same notation applies. `contract` is followed by the literal version `0`.
 
 ```text
-blueprint-requirement-fingerprint-v1\n
+blueprint-requirement-fingerprint-v0\n
 contract\n
-1\n
+0\n
 ears\n
 <ears>\n
 fit\n
@@ -75,7 +75,7 @@ A requirement with a problem has no map entry. Neither does any requirement
 that transitively needs it. Unaffected requirements still receive fingerprints.
 Callers must treat problems as fatal before using the result as a complete set.
 This operation does not replace `CheckGraph`, which validates scheduling edges
-as well as semantic dependencies under [requirement v1](requirement-v1.md).
+as well as semantic dependencies under [requirement v0](requirement-v0.md).
 
 ## Judged reference verification
 
@@ -111,3 +111,10 @@ The Go tests reproduce every canonical string and digest from parsed inputs.
 From the repository root, `sh formats/vectors/check.sh` independently hashes
 each canonical string using `printf '%s'`, `jq` and `shasum -a 256`. It preserves
 the final LF and exits 1 naming each vector whose digest differs.
+
+## Changelog
+
+### 0.1
+
+Initial draft defining canonical bytes, dependency resolution and judged
+reference verification.
