@@ -5,6 +5,39 @@ import (
 	"testing"
 )
 
+// @spec lint/ears-has-shall-and-full-stop
+func TestShape(t *testing.T) {
+	for _, tt := range []struct {
+		name string
+		line string
+		want bool
+	}{
+		{name: "IF THEN", line: "IF a card is declined, THEN THE system SHALL show the decline code.", want: true},
+		{name: "ubiquitous", line: "THE system SHALL log every refund.", want: true},
+		{name: "WHERE", line: "WHERE refunds are enabled, THE system SHALL log every refund.", want: true},
+		{name: "missing SHALL", line: "THE system logs every refund."},
+		{name: "missing full stop", line: "THE system SHALL log every refund"},
+		{name: "missing spaced SHALL", line: "THE system SHALL\tlog every refund."},
+		{name: "trailing space", line: "THE system SHALL log every refund. "},
+		{name: "other lint violations", line: "THE system SHALL respond fast and SHALL log refunds.", want: true},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := Shape(tt.line); got != tt.want {
+				t.Fatalf("Shape(%q) = %v, want %v", tt.line, got, tt.want)
+			}
+			shapeProblem := false
+			for _, problem := range EARS(tt.line) {
+				if problem.Rule == "ears-shape" {
+					shapeProblem = true
+				}
+			}
+			if shapeProblem != !tt.want {
+				t.Fatalf("EARS(%q) reports ears-shape = %v, want %v", tt.line, shapeProblem, !tt.want)
+			}
+		})
+	}
+}
+
 func TestLint(t *testing.T) {
 	for _, tt := range []struct {
 		name  string

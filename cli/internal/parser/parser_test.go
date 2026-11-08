@@ -38,6 +38,54 @@ func TestSpecShapes(t *testing.T) {
 	}
 }
 
+// @spec lint/read-accepts-what-write-accepts
+func TestSpecEARSShapeAndReadLeniency(t *testing.T) {
+	for _, tt := range []struct {
+		name    string
+		ears    string
+		fit     string
+		wantErr bool
+	}{
+		{name: "IF THEN", ears: "IF a card is declined, THEN THE system SHALL show the decline code.", fit: "returns 201"},
+		{name: "ubiquitous", ears: "THE system SHALL log every refund.", fit: "returns 201"},
+		{name: "WHERE", ears: "WHERE refunds are enabled, THE system SHALL log every refund.", fit: "returns 201"},
+		{name: "WHILE", ears: "WHILE running, THE system SHALL log every refund.", fit: "returns 201"},
+		{name: "missing SHALL", ears: "THE system logs every refund.", fit: "returns 201", wantErr: true},
+		{name: "missing full stop", ears: "THE system SHALL log every refund", fit: "returns 201", wantErr: true},
+		{name: "heading instead of EARS", ears: "### THE system SHALL log every refund.", fit: "returns 201", wantErr: true},
+		{name: "old repeated SHALL", ears: "WHEN called, THE system SHALL accept cards and SHALL log payment.", fit: "returns 201"},
+		{name: "old vague EARS", ears: "WHEN called, THE system SHALL respond fast.", fit: "returns 201"},
+		{name: "old vague fit", ears: "WHEN called, THE system SHALL answer.", fit: "1 fast response"},
+		{name: "old unobservable fit", ears: "WHEN called, THE system SHALL answer.", fit: "returns success"},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			path := filepath.Join(t.TempDir(), "feature.md")
+			data := "# feature\nstatus: ready\ndepth: quick\n\n## Intent\n\n## Surfaces\n\n## Requirements\n### works\n`stated`\n" + tt.ears + "\nfit: " + tt.fit + "\n\n## Edges\n\n## Out of scope\n\n## Depends on\n"
+			if err := os.WriteFile(path, []byte(data), 0o644); err != nil {
+				t.Fatal(err)
+			}
+			spec, err := Spec(path)
+			if tt.wantErr {
+				want := path + ":12: missing EARS line ending in a full stop"
+				if err == nil || err.Error() != want {
+					t.Fatalf("error = %v, want %q", err, want)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatal(err)
+			}
+			if len(spec.Requirements) != 1 {
+				t.Fatalf("requirements = %#v, want one requirement", spec.Requirements)
+			}
+			got := spec.Requirements[0]
+			if got.EARS != tt.ears || got.Fit != tt.fit {
+				t.Fatalf("requirement = %#v, want EARS %q and fit %q", got, tt.ears, tt.fit)
+			}
+		})
+	}
+}
+
 func TestOpenIgnoresTemplateCommentAndParsesEntries(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "OPEN.md")
 	data := "# Open\n<!--\n## sample\nstatus: OPEN\n-->\n\n## real\nstatus: OPEN\npass: frame\nasked: 2026-01-01\nowner: founder\nquestion: Why?\ncost: rewrite\nblocks: feature/*\n"

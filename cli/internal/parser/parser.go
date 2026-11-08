@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"blueprint/internal/lint"
 	"blueprint/internal/model"
 )
 
@@ -26,6 +27,7 @@ func Specs(root string) ([]model.Spec, []error) {
 	return specs, errs
 }
 
+// @spec lint/read-accepts-what-write-accepts
 func Spec(path string) (model.Spec, error) {
 	lines, err := readLines(path)
 	if err != nil {
@@ -98,7 +100,7 @@ func Spec(path string) (model.Spec, error) {
 		if conf < 0 || !oneOf(trimTicks(strings.TrimSpace(reqLines[conf])), "stated", "derived") {
 			return bad(sectionLine(lines, "Requirements")+start+2, "missing requirement confidence")
 		}
-		if ears < 0 || strings.HasPrefix(reqLines[ears], "### ") || !strings.HasSuffix(reqLines[ears], ".") || !strings.Contains(reqLines[ears], " SHALL ") || (!strings.Contains(reqLines[ears], "WHEN ") && !strings.Contains(reqLines[ears], "WHILE ")) {
+		if ears < 0 || strings.HasPrefix(reqLines[ears], "### ") || !lint.Shape(reqLines[ears]) {
 			return bad(sectionLine(lines, "Requirements")+start+3, "missing EARS line ending in a full stop")
 		}
 		if fit < 0 || !strings.HasPrefix(reqLines[fit], "fit: ") {

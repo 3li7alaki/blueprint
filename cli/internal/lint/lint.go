@@ -46,12 +46,17 @@ func loadVagueTerms() []vagueTerm {
 	return terms
 }
 
+// Shape reports whether line contains the response keyword and ends in a full stop.
 // @spec lint/ears-has-shall-and-full-stop
+func Shape(line string) bool {
+	return strings.Contains(line, " SHALL ") && strings.HasSuffix(line, ".")
+}
+
 // @spec lint/one-shall-per-requirement
 // @spec lint/no-vague-terms
 func EARS(line string) []Problem {
 	var problems []Problem
-	if !strings.Contains(line, " SHALL ") || !strings.HasSuffix(line, ".") {
+	if !Shape(line) {
 		problems = append(problems, Problem{Rule: "ears-shape"})
 	}
 	if len(shallRE.FindAllStringIndex(line, -1)) > 1 {
