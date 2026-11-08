@@ -43,7 +43,8 @@ func TestWriteAndReadCommands(t *testing.T) {
 		{args: []string{"req", "list", "--blocked"}, want: "checkout/accepts-card"},
 		{args: []string{"open", "list", "--status", "OPEN"}, want: "currency"},
 		{args: []string{"ask", "frame", "--depth", "quick", "--batch", "1"}, want: "who-hurts"},
-		{args: []string{"mint", "checkout/accepts-card"}, want: "mint spec new"},
+		{args: []string{"open", "resolve", "currency"}, want: "currency"},
+		{args: []string{"mint", "checkout/accepts-card", "--scope", "cli/**"}, want: "mint spec new"},
 		{args: []string{"trace", "checkout/accepts-card"}, want: "code:"},
 	}
 	for _, tt := range tests {

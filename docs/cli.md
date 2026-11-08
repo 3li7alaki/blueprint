@@ -23,7 +23,7 @@ Every command supports `--json`. Human output is never the integration protocol.
 | `blueprint ask <pass> [--depth quick\|standard\|paranoid] [--batch 5]` | next unanswered questions from the bank |
 | `blueprint look show [--section <name>]` | one section of `PRODUCT.md`, or the section names |
 | `blueprint check [--gate <name>]` | gate results, exit 1 on any failure |
-| `blueprint mint <feature>/<slug>` | the `mint spec new` command line for that requirement, on stdout, unexecuted |
+| `blueprint mint <feature>/<slug> --scope <globs>` | the `mint spec new` command line for that requirement, on stdout, unexecuted |
 | `blueprint map [--path <p>]` | coverage per directory: files, mapped, unmapped, derived, open |
 | `blueprint inventory <path>` | every file under path: test or code, tagged or not, line count |
 

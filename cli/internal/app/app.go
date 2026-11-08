@@ -56,7 +56,7 @@ read
   ask --confirm [--path p] [--batch n]
   look show [--section register|platform|users|positioning|principles|...]
   check [--gate coverage|orphan|budget|blocked|derived|shape|dash|unmapped|bug|drift|look|tokens]
-  mint <feature>/<slug>              prints the mint unit command, unexecuted
+  mint <feature>/<slug> --scope <globs>   prints the mint unit command, unexecuted
 
 write
   init [--hooks]                     install blueprint into this repo
@@ -972,26 +972,71 @@ func (a App) check(root string, asJSON bool, args []string) (int, error) {
 }
 
 func (a App) mint(root string, asJSON bool, args []string) error {
-	if len(args) != 1 {
+	pos, flags, err := parseFlags(args, map[string]bool{"--scope": true})
+	if err != nil {
+		return err
+	}
+	if len(pos) != 1 {
 		return fmt.Errorf("mint requires feature/slug")
+	}
+	if strings.TrimSpace(flags["--scope"]) == "" {
+		return fmt.Errorf("mint requires --scope <globs>: feature specs do not carry code scope yet")
+	}
+	scope := strings.Split(flags["--scope"], ",")
+	for i := range scope {
+		scope[i] = strings.TrimSpace(scope[i])
+		if scope[i] == "" {
+			return fmt.Errorf("mint requires --scope <globs>: scope entries must not be empty")
+		}
 	}
 	specs, errs := parser.Specs(root)
 	if len(errs) > 0 {
 		return errs[0]
 	}
-	req, ok := allRequirements(specs)[args[0]]
+	req, ok := allRequirements(specs)[pos[0]]
 	if !ok {
-		return fmt.Errorf("blueprint/spec:1: requirement not found: %s", args[0])
+		return fmt.Errorf("blueprint/spec:1: requirement not found: %s", pos[0])
 	}
-	spec := findSpec(specs, req.Feature)
-	scope := sectionValues(spec.Sections["out of scope"])
-	scope = append(scope, "blueprint/spec/"+req.Feature+".md")
-	cmd := "mint spec new " + shellQuote(req.EARS) +
+	if req.Confidence == "derived" {
+		return fmt.Errorf("%s is derived: run blueprint req confirm %s first", req.Qualified(), req.Qualified())
+	}
+	opens, err := parser.Opens(filepath.Join(root, "blueprint", "OPEN.md"))
+	if err != nil {
+		return err
+	}
+	if gates.IsBlocked(opens, req.Qualified()) {
+		return fmt.Errorf("%s is blocked by an OPEN question", req.Qualified())
+	}
+	review, err := os.ReadFile(filepath.Join(root, "blueprint", "REVIEW.md"))
+	if err != nil && !os.IsNotExist(err) {
+		return err
+	}
+	var lenses []string
+	inOrder := false
+	lensRE := regexp.MustCompile(`^[0-9]+\.\s+\*\*([^*]+)\*\*`)
+	for _, line := range strings.Split(string(review), "\n") {
+		line = strings.TrimSpace(line)
+		if strings.HasPrefix(line, "# ") || strings.HasPrefix(line, "## ") {
+			inOrder = line == "## Order"
+			continue
+		}
+		if match := lensRE.FindStringSubmatch(line); inOrder && match != nil {
+			name := strings.TrimSuffix(strings.TrimSpace(match[1]), ".")
+			lenses = append(lenses, strings.ReplaceAll(strings.ToLower(name), " ", "-"))
+		}
+	}
+	specPath := "blueprint/spec/" + req.Feature + ".md"
+	scope = append(scope, specPath)
+	cmd := "mint spec new " + shellQuote(req.Qualified()) +
 		" --slug " + shellQuote(req.Feature+"--"+req.Slug) +
+		" --goal " + shellQuote("Implement "+req.Qualified()+" so that its fit holds: "+req.Fit) +
 		" --scope " + shellQuote(strings.Join(scope, ",")) +
+		" --protected " + shellQuote(specPath) +
 		" --acceptance " + shellQuote(req.EARS) +
-		" --gate " + shellQuote("blueprint check") +
-		" --reviews " + shellQuote("blueprint/REVIEW.md")
+		" --gate " + shellQuote("blueprint: blueprint check")
+	if len(lenses) > 0 {
+		cmd += " --reviews " + shellQuote(strings.Join(lenses, ","))
+	}
 	return a.output(asJSON, map[string]string{"command": cmd}, cmd)
 }
 
@@ -1476,15 +1521,6 @@ func sectionValues(lines []string) []string {
 		}
 	}
 	return out
-}
-
-func findSpec(specs []model.Spec, feature string) model.Spec {
-	for _, spec := range specs {
-		if spec.Feature == feature {
-			return spec
-		}
-	}
-	return model.Spec{}
 }
 
 func qualified(value string) (string, string, error) {
