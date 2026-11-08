@@ -16,6 +16,7 @@ import (
 	"blueprint/internal/atomicfile"
 	"blueprint/internal/base"
 	"blueprint/internal/gates"
+	"blueprint/internal/lint"
 	"blueprint/internal/model"
 	"blueprint/internal/parser"
 	"blueprint/internal/questions"
@@ -267,9 +268,13 @@ func (a App) req(root string, asJSON bool, args []string) error {
 	if len(args) == 0 {
 		return fmt.Errorf("req requires list, show, next, add, or confirm")
 	}
-	specs, errs := parser.Specs(root)
-	if len(errs) > 0 && args[0] != "add" {
-		return errs[0]
+	var specs []model.Spec
+	if args[0] != "add" {
+		var errs []error
+		specs, errs = parser.Specs(root)
+		if len(errs) > 0 {
+			return errs[0]
+		}
 	}
 	reqs := allRequirements(specs)
 	switch args[0] {
@@ -357,8 +362,8 @@ func (a App) req(root string, asJSON bool, args []string) error {
 		if !oneOf(flags["--confidence"], "stated", "derived") || flags["--ears"] == "" || flags["--fit"] == "" {
 			return fmt.Errorf("--ears, --fit, and valid --confidence are required")
 		}
-		if !strings.HasSuffix(flags["--ears"], ".") {
-			return fmt.Errorf("--ears must end in a full stop")
+		if err := lintError(append(lint.EARS(flags["--ears"]), lint.Fit(flags["--fit"])...)); err != nil {
+			return err
 		}
 		if err := noDash(flags); err != nil {
 			return err
@@ -405,8 +410,11 @@ func (a App) req(root string, asJSON bool, args []string) error {
 			}
 			return fmt.Errorf("req correct requires feature/slug")
 		}
-		if flags["--ears"] == "" || flags["--reason"] == "" || !strings.HasSuffix(flags["--ears"], ".") {
-			return fmt.Errorf("--ears ending in a full stop and --reason are required")
+		if flags["--ears"] == "" || flags["--reason"] == "" {
+			return fmt.Errorf("--ears and --reason are required")
+		}
+		if err := lintError(lint.EARS(flags["--ears"])); err != nil {
+			return err
 		}
 		if err := noDash(flags); err != nil {
 			return err
@@ -1000,6 +1008,9 @@ func (a App) mint(root string, asJSON bool, args []string) error {
 	if req.Confidence == "derived" {
 		return fmt.Errorf("%s is derived: run blueprint req confirm %s first", req.Qualified(), req.Qualified())
 	}
+	if req.SupersededBy != "" {
+		return fmt.Errorf("%s is superseded by %s", req.Qualified(), req.SupersededBy)
+	}
 	opens, err := parser.Opens(filepath.Join(root, "blueprint", "OPEN.md"))
 	if err != nil {
 		return err
@@ -1119,8 +1130,11 @@ func (a App) amend(root string, asJSON bool, args []string) error {
 		}
 		return fmt.Errorf("amend requires feature/slug")
 	}
-	if flags["--ears"] == "" || flags["--reason"] == "" || !strings.HasSuffix(flags["--ears"], ".") {
-		return fmt.Errorf("--ears ending in a full stop and --reason are required")
+	if flags["--ears"] == "" || flags["--reason"] == "" {
+		return fmt.Errorf("--ears and --reason are required")
+	}
+	if err := lintError(lint.EARS(flags["--ears"])); err != nil {
+		return err
 	}
 	if err := noDash(flags); err != nil {
 		return err
@@ -1532,6 +1546,17 @@ func qualified(value string) (string, string, error) {
 }
 
 func validSlug(value string) bool { return slugRE.MatchString(value) }
+
+func lintError(problems []lint.Problem) error {
+	if len(problems) == 0 {
+		return nil
+	}
+	messages := make([]string, len(problems))
+	for i, problem := range problems {
+		messages[i] = problem.Error()
+	}
+	return fmt.Errorf("%s", strings.Join(messages, "; "))
+}
 
 func noDash(values map[string]string) error {
 	for flag, value := range values {

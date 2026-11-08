@@ -1,0 +1,42 @@
+# Vague, escape-clause and open-ended terms after the INCOSE Guide to Writing Requirements (rules on vague terms, escape clauses and open-ended clauses).
+adequate
+adequately
+almost
+and/or
+and so on
+appropriate
+appropriately
+approximately
+as appropriate
+as far as possible
+as needed
+as required
+easily
+easy
+efficient
+efficiently
+etc
+fast
+few
+flexible
+if necessary
+if possible
+including but not limited to
+intuitive
+many
+nearly
+optimal
+quick
+quickly
+reasonable
+reasonably
+robust
+seamless
+seamlessly
+several
+slow
+some
+sufficient
+sufficiently
+user-friendly
+various

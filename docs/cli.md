@@ -129,6 +129,14 @@ reformat untouched lines, and refuse to produce an em dash or en dash.
 | `blueprint supersede <old-slug> <new-slug>` | marks a decision or requirement superseded |
 | `blueprint amend <feature>/<slug> --ears <s> --reason <s>` | the only legal edit to an existing requirement. Records the old text and the reason. |
 
+`req add`, `req correct` and `amend` refuse text that breaks a lint rule.
+`req add` checks both EARS and fit text; `req correct` and `amend` check EARS text.
+
+`ears-shape` requires an EARS line containing ` SHALL ` and ending in a full stop.
+`one-shall` permits only one whole word `SHALL` in an EARS line.
+`vague-term` rejects whole words or phrases from the embedded vague term list in EARS or fit text.
+`fit-not-observable` requires a digit, a number or quantity word, a quoted literal, or a token containing `/` in fit text.
+
 `blueprint init` writes `AGENTS.md` (appending the block if the file exists), `CLAUDE.md`, and
 `blueprint/` from templates. It never overwrites an existing spec.
 

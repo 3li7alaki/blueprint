@@ -102,6 +102,7 @@ func TestMintRefusals(t *testing.T) {
 		args       []string
 		confidence string
 		blocks     string
+		superseded string
 		want       string
 	}{
 		{name: "missing scope", want: "--scope"},
@@ -113,6 +114,7 @@ func TestMintRefusals(t *testing.T) {
 		{name: "leading empty entry", args: []string{"--scope", ",a"}, want: "--scope"},
 		{name: "trailing empty entry", args: []string{"--scope", "a,"}, want: "--scope"},
 		{name: "derived", args: []string{"--scope", "cli/**"}, confidence: "derived", want: "blueprint req confirm checkout/accepts-card"},
+		{name: "superseded", args: []string{"--scope", "cli/**"}, superseded: "accepts-bank-transfer", want: "superseded by accepts-bank-transfer"},
 		{name: "blocked requirement", args: []string{"--scope", "cli/**"}, blocks: "checkout/accepts-card", want: "blocked"},
 		{name: "blocked feature", args: []string{"--scope", "cli/**"}, blocks: "checkout/*", want: "blocked"},
 		{name: "blocked project", args: []string{"--scope", "cli/**"}, blocks: "*", want: "blocked"},
@@ -123,6 +125,17 @@ func TestMintRefusals(t *testing.T) {
 				confidence = "stated"
 			}
 			root := newMintFixture(t, confidence)
+			if tt.superseded != "" {
+				path := filepath.Join(root, "blueprint", "spec", "checkout.md")
+				data, err := os.ReadFile(path)
+				if err != nil {
+					t.Fatal(err)
+				}
+				data = bytes.Replace(data, []byte("\n\n## Edges"), []byte("\nsuperseded-by: "+tt.superseded+"\n\n## Edges"), 1)
+				if err := os.WriteFile(path, data, 0o644); err != nil {
+					t.Fatal(err)
+				}
+			}
 			if tt.blocks != "" {
 				open := "# Open\n\n## currency\nstatus: OPEN\npass: rules\nasked: 2026-11-08\nowner: founder\nquestion: Which currency?\ncost: payment rewrite\nblocks: " + tt.blocks + "\n"
 				if err := os.WriteFile(filepath.Join(root, "blueprint", "OPEN.md"), []byte(open), 0o644); err != nil {

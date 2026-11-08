@@ -33,7 +33,7 @@ func TestConfirmEditsTheRequirementNotTheGuidance(t *testing.T) {
 			"--confidence", "derived"},
 		{"req", "add", "pay/logs-every-attempt",
 			"--ears", "WHEN a refund is attempted, THE system SHALL record it.",
-			"--fit", "an audit row exists",
+			"--fit", "exactly one audit row exists",
 			"--confidence", "derived"},
 	} {
 		if code, _, err := run(command...); code != 0 || err != nil {

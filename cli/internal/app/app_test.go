@@ -25,7 +25,7 @@ func TestWriteAndReadCommands(t *testing.T) {
 	commands := [][]string{
 		{"init"},
 		{"spec", "new", "checkout"},
-		{"req", "add", "checkout/accepts-card", "--ears", "WHEN a valid card is submitted, THE system SHALL accept it.", "--fit", "returns success", "--confidence", "stated"},
+		{"req", "add", "checkout/accepts-card", "--ears", "WHEN a valid card is submitted, THE system SHALL accept it.", "--fit", "returns success with status 201", "--confidence", "stated"},
 		{"open", "add", "currency", "--question", "Which currency?", "--cost", "payment rewrite", "--blocks", "checkout/accepts-card"},
 		{"decide", "currency-choice", "--context", "A currency is needed.", "--decision", "Use USD.", "--because", "The founder selected it."},
 	}
@@ -85,7 +85,7 @@ func TestWritersPreserveUntouchedLines(t *testing.T) {
 	}
 	var out bytes.Buffer
 	instance := App{Out: &out, Err: &bytes.Buffer{}, Now: time.Now}
-	code, err := instance.Run([]string{"--root", root, "req", "add", "feature/works", "--ears", "WHEN called, THE system SHALL work.", "--fit", "returns success", "--confidence", "stated"})
+	code, err := instance.Run([]string{"--root", root, "req", "add", "feature/works", "--ears", "WHEN called, THE system SHALL work.", "--fit", "returns 201", "--confidence", "stated"})
 	if code != 0 || err != nil {
 		t.Fatal(code, err)
 	}
