@@ -1104,16 +1104,17 @@ func (a App) supersede(root string, asJSON bool, args []string) error {
 				continue
 			}
 			path := filepath.Join(root, "blueprint", "spec", spec.Feature+".md")
-			data, err := os.ReadFile(path)
-			if err != nil {
-				return err
-			}
-			needle := "fit: " + req.Fit
-			replacement := needle + "\nsuperseded-by: " + args[1]
-			if strings.Contains(string(data), replacement) {
+			if req.SupersededBy != "" {
 				return fmt.Errorf("%s:%d: requirement is already superseded", path, req.Line)
 			}
-			if err := atomicfile.Write(path, []byte(strings.Replace(string(data), needle, replacement, 1))); err != nil {
+			anchor := "fit: " + req.Fit
+			if req.Evidence != "" {
+				anchor = "evidence: " + req.Evidence
+			}
+			if req.Bug != "" {
+				anchor = "bug: " + req.Bug
+			}
+			if err := replaceOnce(path, anchor, anchor+"\nsuperseded-by: "+args[1], req.Line); err != nil {
 				return err
 			}
 			return a.output(asJSON, map[string]string{"superseded": args[0], "by": args[1]}, args[0]+" -> "+args[1])
