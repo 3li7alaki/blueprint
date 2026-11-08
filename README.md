@@ -88,7 +88,8 @@ numbers. `auth-magic-link/link-expires-in-15-min` survives inserts, deletes and 
 Your traceability matrix is `rg '@spec' | sort`. No database, no tool, no ceremony.
 
 **5. Ship.** Each requirement becomes a [mint](https://github.com/3li7alaki/mint) unit. Slug,
-EARS acceptance, scope and gates map one-to-one. blueprint says what's worth building. mint
+EARS acceptance and gates map one-to-one; you name the code scope until requirements carry
+their own. blueprint says what's worth building. mint
 says whether it's allowed to be called done.
 
 ## Your codebase already exists

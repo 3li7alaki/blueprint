@@ -156,11 +156,9 @@ Nothing in adoption needs a new command. It is `req add`, `open add` and `decide
 One requirement, one mint unit:
 
 ```bash
-mint spec new "<goal>" --slug <feature>--<requirement> \
-  --scope "<paths from the spec>,blueprint/spec/<feature>.md" \
-  --acceptance "<the EARS line verbatim>" \
-  --gate "<from AGENTS.md>" --reviews "<from REVIEW.md>"
+blueprint mint <feature>/<requirement> --scope "<code globs>"
 ```
 
-The spec file is inside `--scope` on purpose: editing the spec then invalidates the receipt,
-so spec drift is caught by mint's existing freshness rule rather than new code.
+It prints the `mint spec new` line. The spec file is added to `--scope` on purpose, so editing
+the spec afterwards invalidates the receipt. It is also `--protected`, so mint flags an edit to
+it during an attempt. Gate and review lenses come from `blueprint check` and REVIEW.md.

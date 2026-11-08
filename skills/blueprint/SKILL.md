@@ -88,7 +88,7 @@ a machine can check. A requirement without one is a mood.
 ```sh
 blueprint check                       # all gates, exit 1 on any failure
 blueprint check --gate coverage
-blueprint mint <feature>/<slug>       # prints the mint unit command, does not run it
+blueprint mint <feature>/<slug> --scope <globs>   # prints the mint unit command, does not run it
 ```
 
 `blueprint check` passing means the code is traceable. It does not mean the work is done. mint

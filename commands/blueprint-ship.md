@@ -8,11 +8,11 @@ allowed to be called done. Do not re-implement either side.
 
 $ARGUMENTS
 
-1. `blueprint mint <feature>/<slug>` prints the unit command. It does not run it. Read it,
-   confirm the scope covers every path this touches, then run it.
+1. `blueprint mint <feature>/<slug> --scope <globs>` prints the unit command. It does not run
+   it. Name every code path this touches in `--scope`, read the printed command, then run it.
 
-   The spec file is inside `--scope` deliberately: editing the spec afterwards invalidates the
-   receipt, so spec drift is caught by mint's existing freshness rule instead of new machinery.
+   The spec file is added to `--scope` deliberately: editing the spec afterwards invalidates the
+   receipt. It is also `--protected`, so mint flags an edit to it during an attempt.
 
 2. Initialise an attempt with honest provenance. Executor, vendor, model and locality are
    attributable claims, so state what actually ran, not what you wish had run.
