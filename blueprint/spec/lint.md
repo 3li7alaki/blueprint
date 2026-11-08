@@ -42,14 +42,14 @@ depth: standard
 
 ### ears-has-shall-and-full-stop
 `stated`
-WHEN req add, req correct or amend receives an EARS line without SHALL or without a final full stop, THE system SHALL refuse the write and name the rule ears-shape.
+WHEN req add, req correct or amend receives an EARS line that lacks the response keyword or a final full stop, THE system SHALL refuse the write and name the rule ears-shape.
 fit: req add with the EARS line `THE system accepts cards.` exits 1, prints `ears-shape`, and leaves the spec file byte for byte unchanged
 evidence: lint plan approved by Ali, 2026-11-08
 
 
 ### one-shall-per-requirement
 `stated`
-WHEN req add, req correct or amend receives an EARS line containing SHALL more than once, THE system SHALL refuse the write and name the rule one-shall.
+WHEN req add, req correct or amend receives an EARS line that repeats the response keyword, THE system SHALL refuse the write and name the rule one-shall.
 fit: req add with an EARS line holding 2 SHALL clauses exits 1 and prints `one-shall`
 evidence: lint plan approved by Ali, 2026-11-08
 
@@ -66,6 +66,13 @@ evidence: lint plan approved by Ali, 2026-11-08
 WHEN req add receives a fit line with no number, no quoted or backticked literal and no path, THE system SHALL refuse the write and name the rule fit-not-observable.
 fit: req add with the fit `returns success` exits 1 and prints `fit-not-observable`; the fit `returns 201` is accepted
 evidence: lint plan approved by Ali, 2026-11-08
+
+
+### read-accepts-what-write-accepts
+`stated`
+WHEN a spec file holds an EARS line that passes ears-shape, THE parser SHALL read that requirement without error.
+fit: a spec holding `IF a card is declined, THEN THE system SHALL show the decline code.` and one holding `THE system SHALL log every refund.` both parse, and `blueprint check --gate shape` exits 0
+evidence: go fixes approved by Ali, 2026-11-08
 
 ## Edges
 
